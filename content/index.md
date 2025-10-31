@@ -1,6 +1,10 @@
 ---
-title: Welcome to Quartz
+title: Appunti univr in Obsidian
+date:
 ---
+Benvenuti, sono Enrico! 
 
-This is a blank Quartz installation.
-See the [documentation](https://quartz.jzhao.xyz) for how to get started.
+Studente alla magistrale di "INGEGNERIA E SCIENZE INFORMATICHE"
+
+## LINK
+**github:** https://github.com/EnriNoob 
