@@ -1,0 +1,39 @@
+#### Data: 10/12/2024 - 11:44
+
+1. **Tier 1 - Partial**
+	**Processi di Gestione del Rischio**: Nelle organizzazioni di **Livello 1**, la gestione del rischio informatico viene generalmente svolta in modo ad hoc o reattivo. Inoltre, le attività di cybersecurity sono spesso eseguite con poca o nessuna priorità in base al livello di rischio che affrontano.
+
+	**Programma Integrato di Gestione del Rischio**: La mancanza di processi associati alla gestione del rischio informatico rende difficile per queste organizzazioni comunicare e gestire tale rischio. Di conseguenza, l'organizzazione affronta la gestione del rischio informatico caso per caso, a causa della mancanza di informazioni coerenti.
+
+	**Partecipazione Esterna**: Queste organizzazioni non comprendono adeguatamente il proprio ruolo nel più ampio ecosistema aziendale, inclusa la loro posizione nella catena di fornitura, i dipendenti e le dipendenze. Senza una chiara comprensione del proprio posizionamento nell'ecosistema, un'organizzazione di **Livello 1** non condivide informazioni con terze parti in modo efficace (se lo fa). In generale, non è consapevole dei rischi della catena di fornitura che accetta e trasferisce ad altri membri dell'ecosistema.
+
+	l'organizzazione ha dimestichezza con il NIST CSF e può aver implementato alcuni aspetti del controllo in alcune aree dell'infrastruttura. L'implementazione delle attività e dei protocolli di sicurezza informatica è stata reattiva invece che pianificata. L'organizzazione ha una consapevolezza limitata dei rischi per la sicurezza informatica e non dispone di processi e risorse per garantire la sicurezza delle informazioni.
+	
+2. **Tier 2 - Risk informed**
+	**Processi di Gestione del Rischio**: Sebbene il management approvi, le pratiche di gestione del rischio non sono generalmente stabilite come politiche organizzative a livello aziendale nelle organizzazioni di **Livello 2**. Anche se le pratiche di gestione del rischio non sono standardizzate, esse influenzano direttamente la priorità delle attività di cybersecurity in relazione agli obiettivi di rischio dell'organizzazione, all'ambiente delle minacce e ai requisiti aziendali.
+
+	**Programma Integrato di Gestione del Rischio**: A livello organizzativo esiste consapevolezza del rischio informatico, ma questa non è standardizzata a livello aziendale, e le informazioni sulla cybersecurity vengono condivise solo in modo informale. Sebbene alcuni aspetti legati alla cybersecurity siano presi in considerazione negli obiettivi organizzativi, non sono uniformi. Può essere effettuata una valutazione del rischio informatico, ma non è standard e viene ripetuta solo periodicamente.
+
+	**Partecipazione Esterna**: Le organizzazioni di **Livello 2** comprendono il proprio ruolo nell'ecosistema in relazione a dipendenze o dipendenti, ma non a entrambi. Tipicamente, ricevono informazioni ma non le condividono. Sebbene siano consapevoli dei rischi associati alla loro catena di fornitura, non agiscono
+
+	l'organizzazione è più consapevole dei rischi per la sicurezza informatica e condivide le informazioni su base informale. Non dispone di un processo di gestione dei rischi per la sicurezza informatica a livello di organizzazione che sia pianificato, ripetibile e proattivo.
+	
+3. **Tier 3 - Repeatable**
+	Le organizzazioni di **Livello 3** dispongono di pratiche di gestione del rischio formalmente approvate e definite come politiche. Queste pratiche vengono regolarmente aggiornate in base ai cambiamenti nei requisiti aziendali e all'evoluzione del panorama delle minacce.
+
+	**Programma Integrato di Gestione del Rischio**: Questo livello adotta un approccio globale a livello aziendale per la gestione del rischio informatico. Politiche, processi e procedure basati sul rischio sono definiti, implementati e revisionati. Sono presenti metodi per rispondere in modo coerente ed efficace ai cambiamenti del rischio, e il personale possiede le conoscenze e le competenze necessarie per svolgere i propri ruoli. I responsabili della cybersecurity, il consiglio di amministrazione e i dirigenti aziendali comunicano regolarmente in merito a eventi e rischi legati alla cybersecurity.
+
+	**Partecipazione Esterna**: Le organizzazioni di **Livello 3** comprendono il loro ruolo negli ecosistemi e contribuiscono alla comprensione più ampia dei rischi. Collaborano regolarmente con altre entità, condividendo informazioni generate internamente. Queste organizzazioni sono consapevoli dei rischi associati alle loro catene di fornitura e agiscono formalmente, ad esempio attraverso accordi scritti che definiscono requisiti di base, strutture di governance e implementazione e monitoraggio delle politiche.
+
+	l'organizzazione e i suoi alti dirigenti sono consapevoli dei rischi per la sicurezza informatica. Hanno implementato un piano di gestione dei rischi per la sicurezza informatica ripetibile a livello di organizzazione. Il team di sicurezza informatica ha creato un piano d'azione per monitorare e rispondere in modo efficiente agli attacchi informatici. Tutto il framework per la gestione dei rischi è implementato
+
+4. **Tier 4 - Adaptive**
+	**Processi di Gestione del Rischio**: Le organizzazioni di **Livello 4** adattano le loro pratiche di cybersecurity in base alle attività passate e presenti, inclusi gli insegnamenti appresi e i fattori predittivi. Implementano un processo di miglioramento continuo, integrando tecnologie e pratiche avanzate di cybersecurity e adattandosi attivamente all'evoluzione delle minacce e delle tecnologie.
+
+	**Programma Integrato di Gestione del Rischio Informatico**: Basandosi sul livello 3, le organizzazioni di **Livello 4** comprendono chiaramente il collegamento tra gli obiettivi organizzativi e il rischio informatico. I dirigenti senior monitorano i rischi informatici nello stesso contesto dei rischi finanziari e organizzativi. Le decisioni di budget si basano su una comprensione del contesto attuale e potenziale dei rischi. Il rischio informatico è integrato nella cultura organizzativa ed evolve grazie alla consapevolezza delle attività precedenti e a una consapevolezza continua.
+
+	**Partecipazione Esterna**: Superando il livello di integrazione del **Livello 3**, le organizzazioni di **Livello 4** ricevono, generano e contribuiscono alla comprensione dell'ecosistema del rischio. Una maggiore integrazione nella condivisione delle informazioni con stakeholder interni ed esterni consente all'organizzazione di utilizzare informazioni in tempo reale per comprendere e affrontare regolarmente i rischi della catena di fornitura. Dispongono anche di un processo formalizzato, integrato nella loro documentazione, per gestire dipendenze e relazioni con terze parti.
+
+	l'organizzazione è ora resiliente da un punto di vista informatico e utilizza le lezioni apprese e gli indicatori predittivi per prevenire gli attacchi informatici. Il team di sicurezza informatica migliora e fa progredire continuamente le tecnologie e le prassi di sicurezza informatica dell'organizzazione e si adatta alla variazione delle minacce in modo rapido ed efficiente. L'approccio alla gestione dei rischi per la sicurezza informatica è adottato a livello di organizzazione, con un processo decisionale, politiche, procedure e processi adeguati ai rischi. Le organizzazioni adattive integrano la gestione dei rischi per la sicurezza informatica nella loro definizione dei budget e nella loro cultura organizzativa. Il framework è completamente implementato e si anticipano possibili attacchi
+
+#### REFERENZE: https://www.cybersaint.io/blog/the-nist-cybersecurity-framework-implementation-tiers-explained#:~:text=The%20tiers%20are%20one%20of,characteristics%20of%20the%20NIST%20CSF.

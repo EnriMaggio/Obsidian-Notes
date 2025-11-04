@@ -1,0 +1,6 @@
+
+Gli avversari possono usare **comunicazioni vocali** per ottenere accesso ai sistemi delle vittime. Lo **spearphishing vocale** è una variante dello spearphishing che manipola le vittime per convincerle a concedere accesso ai sistemi tramite una telefonata o altri mezzi vocali. Questo attacco sfrutta tecniche di **ingegneria sociale**, come fingere di essere una fonte affidabile (**impersonificazione**) o creare un senso di **urgenza** o **allarme** nella vittima.
+
+Tutte le forme di phishing sono attacchi di **ingegneria sociale veicolati elettronicamente**. In questo caso, gli avversari **non inviano direttamente malware**, ma si affidano all’**esecuzione da parte dell’utente**. Ad esempio, la vittima può ricevere un messaggio di phishing che le chiede di chiamare un numero di telefono. Una volta in contatto, l’attaccante può **indirizzarla a visitare un sito malevolo, scaricare malware o installare strumenti di accesso remoto**.
+
+Gli avversari possono anche combinare lo **spearphishing vocale con attacchi ai sistemi di autenticazione a più fattori (MFA)**. In questo modo, cercano di **ingannare la vittima affinché fornisca credenziali MFA** o accetti richieste di autenticazione fraudolente, facilitando l’accesso ai sistemi protetti.
