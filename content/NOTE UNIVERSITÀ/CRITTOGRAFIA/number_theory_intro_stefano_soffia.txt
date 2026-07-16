@@ -1,0 +1,2363 @@
+Author: Stefano Soffia
+
+A VERY FUNDAMENTAL LESSON
+
+Informally, it is not possible to define an absolutely secure encryption
+method unless the key is long at least as the encrypted message.  By
+"absolute secure" we mean that it can be proved that it is computationally
+impossible to break (notice that now we are not even talking about
+feasibility, eg. the time.) Shannon proved formally this idea.  This finds
+its practical realization in the `one-time-pad' encryption schema. In all
+other encryption techniques, where the length of the key is fixed with
+respect to the message size, some bits of information about the key or the
+clear-text are left within the cypher-text.  So, as long as NP=P is false,
+the hope of all the other encryption methods (those commonly used in
+practice) is that the problem of extracting these bits from the cypher-text
+lives in the NP \ P part of the universe. This way, tough computationally
+possible, it becomes practically infeasible to break the encryption.
+
+The general strategy is then to identify some crucial (theoretical)
+problems that are supposed to stay in NP \ P and on this fact base the
+security of the derived encryption method, that is, that it can be proved
+that any attack to the encryption can be used (Turing transformed) to solve
+the underlying problem.  It happens that currently, no one knows if the
+problems used as base for the encryption are really in NP / P, that is, if
+it does exist a polynomial-time way to solve them.  Among these problems we
+will see the --factorization-- and the --discrete logarithm--.
+
+INTRODUCTION TO NUMBER THEORY
+
+Currently, a DPT algorithm to check whether a given natural number is prime
+is known, however we do not know any PPT algorithm to factorize.  This fact
+seems to contradict a previous assumptions of the complexity theory that
+states that if a DPT algorithm for solving a satisfiability problem exists
+(is this number factorizable?) then there exists also a DPT algorithm that
+solves the corresponding operational problem (factorize this number).  For
+example, this assumption suggests that if there exists a DPT primality test
+then it also exists a DPT factoring algorithm.  It is due to this
+assumption that the problems considered in complexity theory are always in
+the satisfiability form.  Currently, the primality/factorization case is
+the only known exception to this conjecture.
+
+Given n \in \nat, we denote with (Z_n, +) the group where Z_n = { 0, ...,
+n-1 } and the associated operation is the addition modulo n.  Recall that
+the definition of group requires that
+  - the operation is closed wrt Z_n
+  - that there exists a neutral element (often denoted as 0)
+  - that the operation is associative
+  - each element has an inverse.
+Moreover, if the operation is also commutative the group is said to be
+abelian or commutative.  More formally Z_n can be defined as the set of the
+equivalence classes induced on Z by the relation a R b \iff (a = b) mod n.
+
+We denote as (Z*_n, *) the (abelian) group where Z*n = { i \in Z_n | GCD(i,
+n) = 1} and the operation is the usual multiplication modulo n.  Note that
+the condition GCD(i, n) = 1 requires that the elements of Z*n must be
+co-prime with n.  Let us check that Z*n is effectively a group.  One of the
+fundamental building blocks of the number theory is Euclid's algorithm for
+computing the greatest common divisor.  We can describe its idea as
+follows.  Let a, b \in \nat such that a > b.  The algebra theory tells us
+that we can always find other two naturals, q and r, such that a = bq + r
+and r < b. Now let d \in \nat be a common divisor of a and b; we will
+denote this as d|a and d|b, respectively.  Since d|b then d|bq, but we know
+that d|a too, that is d|(qb + r). This implies the conclusion d|r.  This
+argument shows that the set of divisors common to a and b is equal to the
+set of divisors common to b and r and it suggests the rule GCD(a, b) =
+GCD(b, a mod b).  Since (a mod b) < b we have a decreasing sequence of
+elements.  We can stop the computation when GCD(a, 0) = a. (Recall that
+from the definitions, each natural divides 0).  At this point, the algebra
+comes at our help suggesting the following theorem. For each a, b \in Z
+there exist x, y \in Z such that ax + by = GCD(a, b).  To show that the
+multiplication modulo n is closed wrt the elements of Z*_n let i,j \in
+Z*_n, i.e., GCD(i, n) = GCD(j, n) = 1 or equivalently, there exist x, y, z,
+w \in Z such that:
+
+  ix = 1 - ny
+  jz = 1 - nw
+
+from this we have that:
+
+  (ij)(xz) = (1 - ny)(1 - nw) = 1 - n(...)
+
+or equivalently GCD(ij, n) = 1, then also ij \in Z*_n.  For what concerns
+the existence of multiplicative inverses, things are even simpler. Let a
+\in Z*_n. From the definition we have that GCD(a, n) = 1 or that there
+exist x, y \in Z such that ax = 1 - ny. Simply by changing the roles of a
+and x we have that also x is co-prime wrt n and then also x \in Z*_n. Note
+also that ax = 1 - ny =_n 1, i.e., x is the inverse of a.  Now let me go
+back to the definition of the Euclide's algorithm.  We have said that there
+is a theorem that states that for every integer numbers a, b \in Z there
+exist x, y \in Z such that ax + by = GCD(a, b). It is worth to notice that
+Euclide's algorithm allows us also to compute these coefficients.  Let a >
+b \in N then let for the base case:
+
+  q_0 = 1
+  a_0 = a
+  a_1 = b
+
+and for the inductive case
+
+  q_{n+1} = a_n div a_{n+1}
+  a_{n+2} = a_n - q_{n+1} * a_{n+1}
+
+Informally, a_{n+2} is the remainder of the division between a_n and a_{n +
+1}.  The computation of the Euclid's algorithm stops when the sequence of
+a_n reaches the value 0 and the value of the gcd is the value computed at
+the previous step (namely, if a_{n+1} = 0 then gcd(a, b) = a_n.) Following
+the same schema of the recursive rule depicted above it is possible to
+define other sequences to compute the coefficient x and y such that ax + by
+= gcd(a,b).  Basically, the idea is to consider a and b as variables of a
+polynomial and the procedure goes iteratively by replacing a_{n+1} with
+a_{n-1} - q_n * a_n in the relation a_{n+2} = a_n - q_{n+1} * a_{n+1}.  We
+define the sequences:
+
+  x_0 = 1
+  x_1 = 0
+  x_{n+2} = x_{n} - q_{n+1} * x_{n+1}
+
+  y_0 = 0
+  y_1 = 1
+  y_{n+2} = y_{n} - q_{n+1} * y_{n+1}
+
+Note that the inductive part of these two sequences is the same: they
+differ only in the base case.  Then, if n is such that a_n = gcd(a, b) then
+we have that:
+
+  a * x_n + b * y_n = a_n = gcd(a, b)
+
+Note that a * x_k + b * y_k = a_k holds for every k <= n.
+
+CYCLIC GROUPS
+
+Let (G, *) be a group and g \in G. In this section we consider the sequence
+g, g^2, g^3, ...
+
+Theorem [Pascal]
+
+  \forall g \in G \itc g^{\card G} = 1
+
+Informally, this theorem says that every element of G at the n-th power is
+equal to the neutral element where n is the cardinality of G.
+
+Definition [Cyclic Group]
+We say that the group (G, *) is cyclic if there exists an element g \in G
+such that each element of G can be expressed as a power of g, i.e,
+
+  \exists g \in G \st { g^n | n \in \naturals } = G
+
+Such element g is called generator of the group.
+
+Note: if p is a prime number then the cardinality of Z*_p is exactly p - 1,
+indeed if p is prime it is relatively prime wrt all the smaller naturals.
+However, not all the elements of Z*_p are generator of the group.  Consider
+for instance Z*_7 = { 1, 2, 3, 4, 5, 6 } and note that 3 is a generator but
+2 is not:
+
+  Power: 1 2 3 4 5 6
+      2: 2 4 1 2
+      3: 3 2 6 4 5 1
+
+Theorem [Lagrange]
+For every element g \in G, { g^n }_n is a subgroup of of the group.
+
+Definition [Euler \phi function]
+We call \phi(n) the order of the group Z*_n.
+
+One of the basic properties of the \phi function is the following: if p is
+a prime number then \phi(p) = p-1.  Moreover, if p and q are relatively
+prime then \phi(pq) = \phi(p)\phi(q). (This can be proved using the
+Chinese-Reminder theorem.)  Notice that if p and q are primes but not
+relatively prime (i.e., p = q) this relation does not hold; consider for
+instance the case p = q = 3, where Z*_9 has 6 elements and not (3-1)(3-1) =
+4. Computing \phi(n) is easy (i.e., it can be done in polynomial time in
+the number of bits of n) if we know the factorization of n. But the
+factorization is believed to be an hard problem and it is not known any
+method to compute \phi(n) in polynomial time without having the factors of
+n.
+
+DISCRETE LOGARITHM
+
+If g \in G is a generator we can formalize the problem of the discrete
+logarithm as follows: given a \in G what is the i \in \naturals such that a
+= g^i?  Note that from the Pascal theorem we have that for every k \in
+naturals it holds that g^{k|G|} = 1 and then a = g^{i + k|G|}. Then, by
+restricting ourselves to Z_{|G|} we assure the uniqueness of the solution i
+to this problem.
+
+SQUARES IN Z*_p
+
+Let a \in Z*_n. We say that a is a square in Z*_n if there exists an
+element b \in Z*_n such that a = b^2, otherwise we say that it is
+non-square.  We have the following interesting result: if p is a prime
+number then Z*_p is a cyclic group of order p-1.  This means that there
+exists an generator g such that
+
+  \forall i,j \in { 0, ..., p-1 },  i \neq j \iff g^i \neq g^j.
+
+Then we can easily see that for every i \in { 0, ..., (p-1)/2 }, 2i < p-1
+and the element g^{2i} is a square and they are all distinct because:
+
+  i \neq j \and i, j < (p-1)/2
+  \implies 2i \neq 2j \and 2i, 2j < p-1
+  \implies g^{2i} \neq g^{2j}
+
+So this means that in Z*p at least half of the elements (i.e., (p-1)/2) are
+squares. Let us see why in the other half there are only non-squares.
+Consider an i \in { 0, ..., (p-1)/2 - 1 } and the element a = g^{2i + 1}.
+The element a is a non-square, indeed if we assume that a is a square it
+would exist an index j \in { 0, ..., (p-1)/2 } such that a = (g^j)^2 =
+g^{2j} and then, because Z*_p is cyclic, 2j = 2i + 1 \mod (p-1), which is
+of course impossible.  Then we can conclude that in Z*_n exactly one half
+of the elements are squares and that every generator g is a non-square.  We
+can now reason about the roots of a square in Z*_p. Of course g^i is a root
+of g^{2i}. Note however that also (g^{i + (p-1)/2})^2 = g^{2i}g^{p-1} =
+g^{2i}, i.e., g^{i + (p-1)/2} is another root of g^{2i}.  Note that
+g^{(p-1)/2} = -1, so we can also write g^{i + (p-1)/2} = (-g)^i.  One
+interesting thing is to check whether a given element of Z*_n, for any n,
+is a square or not.  If we are in Z*_p with p prime we have the `Legendre
+symbol':
+
+  (a / p) = a^{(p-1)/2} \mod p
+
+Given a square g^{2i} \in Z*_p we have from the Pascal's theorem ( g^{2i} /
+p ) = g^{i(p-1)} = 1.  Instead, given a non-square element g^{2i + 1} we
+have ( g^{2i + 1} / p ) = g^{(2i + 1)(p-1)/2} = (-1)^{2i + 1} = -1, since
+g^{(p-1)/2} = -1 and 2i + 1 is certainly odd.  Summarizing, (a / p) = 1 if
+a is square and -1 if it is not.  But of course the Legendre symbol cannot
+be generalized to every natural n Indeed, in its formulation we rely on the
+existence of a generator g of the whole group, i.e., on the cyclic-ity of
+the group.  However, as soon as n is not prime, Z*_n is not cyclic (is this
+true?) so things get more complicated.  The `Jacobi symbol' is an extension
+of the Legendre symbol to a generic n.  If n is prime then the Jacobi
+symbol has the same behaviour of the Legendre symbol (and indeed we use the
+same notation). Then, given two co-prime naturals p and q, n = pq, we have:
+( a / pq) = (a / p)(a / q).  With this rule (and others like this one) it
+is possible to compute the Legendre symbol in a polynomial number of steps
+(polynomial wrt the logarithm of n, i.e., the number of bits required to
+represent n).  From this definition it follows that if (a / n) = -1 then
+definitely a is a non-square. But if ( a / n ) = 1 then we can not be sure
+because, that 1 could be the result of (-1)(-1), in this case a is a
+non-square, or it can be the result of (1)(1) and in this case a is a
+square.  However, if we know the factorization (p, q) of n, by computing
+(a/p) and (a/q) we can determine exactly if a is a square or not.
+Currently, it is not known whether it is possible to compute in PPT if a
+given element of Z*_n is square or not without knowing the factorization of
+n (nor exists a proof that shows that it is impossible.) We will refer to
+this later on as the QR-assumption.
+
+Another problem considered difficult is the finding of roots in Z*_n.
+Basically, it can be shown that with PT overhead it is possible to go from
+the factorization of n to the computation of roots and viceversa.  We show
+one side of the implication. Let p, q be distinct prime numbers and let n =
+pq.  From the Chinese Reminder Theorem we know that a square in Z*_n has at
+most 4 distinct roots.  (Really?) Now suppose to have an algorithm S that
+in polynomial time given any square of Z*_n returns one of the 4 roots. We
+are going to show that in this case we will be able to factorize n.  By
+reasoning by modus-tollens, this means that as long as the problem of
+factoring a number is hard then also the problem of finding roots in Z*_n
+is hard; or in other words, the problem of finding roots is hard as least
+as the problem of factoring.  Start by considering the following result.
+
+Lemma
+Let p, q be distinct primes and n = pq.  Let x, y \in Z*_n such that x
+\neq_n y, x \neq_n -y and x^2 =_n y^2.  Then gcd(n, x-y) = p and gcd(n,
+x+y) = q.
+
+Proof
+The condition x \neq_n y can be restated as x - y \neq_n 0.  The condition
+x^2 =_n y^2 can be rewritten as x^2 - y^2 =_n 0.  But x^2 - y^2 =_n (x -
+y)(x + y) =_n 0. Since p|n and p is prime we have that p|(x-y) or p|(x+y).
+Assume that p|(x-y).  Now, note that it cannot be q|(x-y) since q and p are
+distinct primes an this would imply that pq=n|(x-y), i.e., x-y =_n 0 and
+this is in contradiction with the hypothesis x - y \neq_n 0.  This enables
+us to conclude that GCD(pq, x-y) = p.  Now since q|(x-y)(x+y) but q \not|
+(x-y) we have that q|(x+y) and (since p can not divide (x+y)) then GCD(pq,
+x+y) = q.  The other case, i.e., p|(x+y) is symmetrical.
+
+Well, given the algorithm S and the above lemma we can proceed as follows.
+Chose an x \in Z*_n. This can be done in polynomial time: chose an x \in
+Z_n and then check if GCD(n, x) = 1; more than a quarter of the elements of
+Z_n are also elements of Z*_n (precisely (p-1)(q-1)/pq) then usually no
+more than 4 trials will be necessary.  Then supply to S the number x^2
+getting back a root y of x^2. If x \neq_n +-y then using the lemma we can
+compute the factors of n in polynomial time.  Instead, if x =_n +-y, then
+try again the same procedure by guessing another x. Note that if x is
+guessed uniformly over Z*_n then the algorithm S will give us the useful
+root with probability 1/2; in other words, since we do not reveal our root
+x to S, but only x^2, then S can't be so bastard to always return the root
+that we are unable to exploit.
+
+It is worth to stress a difference. In the case of checking if a number is
+a square (the quadratic residuosity problem) we have no proof of the fact
+that by solving that problem we can solve also other problems that are
+believed to be difficult. Instead, in the case of root finding we have
+proved rigorously that if we have a method to solve this problem then we
+can also solve the factorization problem. During the rest of this notes
+this kind of observation are repeated several times as they are of great
+interest: if the security of an encryption method is based on some
+theoretical problem, then I can be sure of it as long as I trust those
+mathematicians that have spent their days trying to solve this problem.  It
+is the case that the problem of factorization and discrete-logarithm are
+probably the two most studied problem in the history of math.  So, if
+breaking an encryption method means to find PPT algorithm for factoring
+then I can be quite sure.
+
+DIFFIE-HELLMAN ENCRYPTION
+
+The Diffie-Hellman method is an example of a public key encryption schema
+where for each actor there are two keys:
+  - a public key, which is of public domain and can only be used to encrypt
+    messages
+  - a private key, that is the only way to decrypt a message encrypted with
+    the public key. (Or at least, the security of the protocol is based on
+    the assumption that the private key is the only way to decrypt in PPT.)
+
+The Diffie-Hellman was the first protocol to describe a way to securely
+exchange information between two agents that do not share any secret (that
+is, they do not have a common key) provided that the public keys are
+affordable (that is, complete man-in-the-middle attacks are not
+considered.)
+
+Let p be a prime and g a generator of Z*_p. The pair (p, g) is publicly
+exchanged between the two communicating agents A and B. The agent A draws
+an x \in Z_p, which becomes its private key, and it computes g^x, which
+becomes its public key. In the meanwhile, the agent B does the same
+producing a public key g^y. Now the agent A, from x and g^y can compute
+g^{xy}. In the same way the agent B can compute g^{xy} from y and g^x.  The
+g^{xy} is the shared secret and it is used by the two as the key of one of
+the classical symmetrical encryption algorithms.  The security of this
+method is based on the following facts:
+  - [the `DH-assumption'] any attacker that wants to compute the secret
+    g^{xy} knowing only (p, g, g^x, g^y) needs to compute the discrete
+    logarithm of g^x or g^y.
+  - computing the discrete logarithm in Z*_p is an hard problem.
+As we have already argued, the discrete-logarithm is commonly accepted as
+an hard problem, however no proof exists that shows the connection between
+the security of this protocol and the DL-problem; in other words, the
+DH-assumption is only a conjecture.
+
+(QUESTION: given a prime p how can we compute a generator of Z*_p in
+polynomial time?)
+
+Notice that the inverse problem, that is to compute g^i mod p given (g, i,
+p) is easy, as it can be computed in a number of steps that is polynomial
+in the number of bits of i. Notice that we are talking of g^i in Z*_n,
+indeed in Z, the number g^i is composed by a sequence of bits whose length
+is exponential in i, then no polynomial algorithms can exists to compute
+g^i in Z.  Instead, in Z*_n we have a `fast exponentiation' algorithm.
+Basically, think to i as:
+
+  i = \sum_{k = 0}^n i_k 2^k,
+
+where n is the number of bits of i and i_k is the k-th bit of i. Now
+rewrite this expression in the Horn form:
+
+  B_n = i_n,
+  B_{n-1} = 2 B_n + i_{n-1}.
+
+  G_n = g^{B_n}
+  G_{n-1} = (G_n)^2 g^{i_{n-1}}
+          = g^{B_{n-1}} = g^{2 B_n + i_{n-1}}
+
+Finally, notice that: g^i = G_0.  With the term `One-way function' we mean
+a function that is easy to compute but its inverse is hard to compute.
+With the term `One-way function with trapdoor' we mean a one-way function
+for which there exists an additional piece of information that makes the
+computation of the inverse function easy too.  Consider the two problems
+that we have seen so far. The computation of the exponentiation/discrete
+logarithm is an example of one-way function.  However in this case there
+are no trap-door informations that can make easy the computation of the
+discrete logarithm; for this reason the exponentiation in Z*_p is called
+one-way function without trap-door.  Now we see an example of one-way
+function with trap-door.
+
+RSA ENCRYPTION  (Rivest-Shamir-Adelman)
+
+In the RSA algorithm the agent A is required to compute two random prime
+numbers, say p and q. For convenience of notation we call n = pq. Let h =
+\phi(n) = (p-1)(q-1) be the order of the group Z*_n.  Then A choses another
+random natural e \in Z*_h, i.e., GCD(e, \phi(n)) = 1; call d the inverse of
+e wrt Z*_h, i.e., de = 1 + k\phi(n).  In this encryption schema the public
+key is the pair (n, e) and the private key is either d or the pair (p, q).
+Indeed to decrypt the messages encrypted with the public key it is
+sufficient d, however from (p, q) and e it is possible to compute d.  Given
+a message m \in \naturals we can assume that m <= n, otherwise we simply
+split the original message in a sufficient number of chunks m = m_1 , ... ,
+m_n with this property.  The encryption function E is defined as E(m) = m^e
+\mod n and the decryption function D is defined as D(m) = m^d \mod n.  To
+ensure that this schema works we must show that D inverts E, i.e., that for
+every m \in Z_n we have that D(E(m)) = m \mod n.  To show this point
+consider the following lemmas.
+
+Lemma 1
+Let a, b, p, q \in \naturals with p and q relatively prime, i.e., GCD(p, q)
+= 1 and suppose that holds that
+
+  a = b \mod p
+  a = b \mod q
+
+then:
+
+  a = b \mod pq
+
+Proof
+a = b \mod p means that a - b = pk for some k \in \naturals. Analogously,
+we can find a t \in \naturals such that a - b = qt. Then pk = qt, which
+means that p | qt but p \not | q or p = 1, because by hypothesis p and q
+are relatively prime. Then there exists another r \in naturals such that qt
+= qpr. Composing these equalities we have that a - b = qpr, i.e., a = b
+\mod pq, which is the thesis.
+
+Lemma 2
+Let p, m, k \in \naturals with p a prime number. Then
+
+  m^{k(p-1) + 1} = m \mod p
+
+Proof
+We have to consider two distinct cases.  a) For the first case assume that
+GCD(m, p) = 1, then by definition [m] \in Z*_p and by the Pascal theorem we
+have that m^(p-1) = 1, then m^{k(p-1) + 1} = (m^{p-1})^k m = 1^k m = m,
+which is the thesis.  b) For the second case assume instead that GCD(m, p)
+\neq 1. Since p is prime by hypothesis this means that m is a multiple of
+p, i.e., m = 0 \mod p. But then m^{k(p-1) + 1} = 0^{k(p-1) + 1} = 0 = m
+\mod p, which is again the thesis.
+
+Lemma 3
+Let p, q, m, k \in \naturals such that p and q are distinct prime numbers.
+Then we have:
+
+  m^{(p-1)(q-1)k + 1} = m \mod pq
+
+Proof
+Since p and q are primes, from Lemma 2 we have that
+
+  m^{(p-1)(q-1)k + 1} = m \mod p
+  m^{(p-1)(q-1)k + 1} = m \mod q
+
+Since p and q are also relatively primes, from Lemma 1 we have finally
+that:
+
+  m^{(p-1)(q-1)k + 1} = m \mod pq
+
+that is the thesis.
+
+Finally, we can conclude:
+
+  D(E(m)) = m^{ed} = m^{1 + k\phi(n)} = m^{1 + k(p-1)(q-i)} = m \mod n.
+
+Note: Lemma 1 requires that p and q must be relatively prime. Note that
+this is not a generalization of the `p and q primes': indeed when we say
+that p and q are relatively prime we mean that GCD(p, q) = 1 which in turns
+implies that p and q are distinct; on the other hand, when we say that p
+and q are primes we are not requesting that they are distinct.  Note that
+Lemma 1 is false if p and q are the same; consider for instance p = q = 3.
+Then we have n = pq = 9 but note that 6 = 0 mod 3 but 6 != 0 mod 9.
+Moreover, the RSA-algorithm itself does not work if p = q. Consider for
+instance again the case p = q = 3, then n = 9 and \phi(9) = 6. In this case
+we have: 6^{\phi(9) + 1} = 6^7 = 0 \mod 9, i.e., 6^{\phi(9) + 1} != 6 mod
+9.
+
+For what concerns the numbers e and d we have that e, as it is done for p
+and q, can be guessed: the agent A draws a number (of the required size)
+and then it can check if it is relatively prime with n using the GCD
+algorithm, if it is not prime A will repeat the procedure.  Once we have
+chosen e it becomes possible to compute d using the extended Euclid's
+algorithm. Indeed, since e and \phi(n) are relatively prime we have GCD(e,
+\phi(n)) = GCD(e, (p-1)(q-1)) = 1, but then we know that there exist x, y
+\in \naturals such that ex + \phi(n)y = 1, or equivalently, ex = 1 \mod
+\phy(n).  Notice however that to compute \phi(n) you must know the
+factorization (p, q), then you must know the factorization of n in order to
+compute d from the public key (n, e): this is why it is not possible to
+compute the private key d from the public key.
+
+This method is based on what is called the ``RSA assumption'' that is that
+to compute m from m^e and the public key (n, e) requires the computation of
+d. In other words the RSA-assumption says that to compute the e-th root of
+a number modulo n requires to compute the inverse d of e in Z*_{\phi(n)}.
+Recalling the discourse about one way functions in this case we have that
+the function is the exponentiation in Z*n while its inverse is the
+computation of the e-th root of the m^e (the exponent e is public). The
+trap-door information is the factorization of n, that allows to compute d.
+Recall that as also shown by a previous lemma, the problem of finding roots
+in Z*n and of factoring n is strictly related.  In other words, we can say
+that the security of RSA relies on the following assumptions:
+  1. Computing the factorization of n is hard.
+  2. The computation of \phi(n) requires to know the factorization of n
+     (to be performed in polynomial time.)
+  3. Computing the e-th root of a number in Z*_n requires to know the
+     inverse of e in Z*_\phi(n). (the RSA-assumption)
+     Notice that this is a conjecture, i.e., it has been never proved.
+
+Note however that the use of RSA requires some additional attentions.
+First, if the set of the messages sent comes from a small space then a
+brute-force attack can be attempted: the attacker B intercepts an encrypted
+message m^e, then he encrypts every possible message o, obtaining E(o) =
+o^e. Then noting that m^e = o^e \mod n \implies m = o \mod n (*) he can
+easily find the clear text m. (Of course, two different clear-text messages
+produce different encrypted texts.) This and other possible problems due to
+a very particular distribution of the input of E can be solved with a
+technique called `Probabilistic Encryption'. Basically, the idea is to
+generate some random bits r and then encrypt (r, m) instead of m. In this
+way the attacker will not be able to use the relation the (*). In other
+words, the addition of some random bits has the effects of increasing the
+space of the possible messages so as to make unfeasible a brute-force
+attack.
+Other problems:
+  - chopping of the original message -> malleability, the protocol allows
+    the forging of fake messages by concatenating encrypted blocks whose
+    content is however unknown to the attacker. This problem can be solved
+    as follows. Instead of encrypting a message m = m_1, ..., m_n as E(m) =
+    E(m1), ..., E(m_n) we define the sequence r_0 = random, r_{k+1} =
+    m_{k+1} xor E(k_n), then we send E(r_0), ..., E(r_n).
+  - if E(m) = m^e < n then m can be computed from E(m), n and e using the
+    root algorithm of Z.
+
+DISCOURSE ON THE SECURITY OF ENCRYPTION
+
+Suppose we have an encryption schema.  We start with a simple observation:
+given a cypher-text c suppose we have obtained in some way what we believe
+being the corresponding clear-text m.  How can we check if m is effectively
+the clear-text corresponding to c?  Of course, we use the public key (which
+is publicly available) to encrypt m and then we check whether E(m) = c.
+Once again, the injectivity of the encryption mechanism (different
+cypher-texts correspond to different clear-texts) ensures us that in that
+case m is the correct one. (Notice however that if the encryption schema
+adds some random bits to the clear-text before encrypting it, then this
+observation is no more applicable.)
+
+Now suppose we have an algorithm S running in polynomial time that (without
+knowing the secret key) that given a cypher-text c it can produce the
+corresponding clear-text m = D(c), with a probability of 1%.  Well, the aim
+of this section is to show that under these hypotheses the encryption
+schema is broken, that is, there exists an algorithm that runs in
+polynomial time that guesses m from c with a probability arbitrarily close
+to 1.
+
+All this only to show that for an encryption schema to be ``secure'' it is
+necessary that the better that it can be done by a polynomial attacker
+(that does not know the secret key) is to guess the right message with a
+probability of 1 / 2^k = 1 / (the number of the possible keys), where k is
+the number of bits of the key (that we shall call the `security
+parameter').  In other words, the best that it is possible to do to decrypt
+a message without knowing the secret key is to chose (with a uniform
+distribution) a key from the space of the possible keys (which contains 2^k
+keys) and try it, this means that it can then test one key in polynomial
+time but, being the number of the possible keys exponential, it needs an
+exponential time to decrypt successfully the encrypted message.
+
+In the above statement, by saying that we assume an attacker that is able
+to ``guess'' the clear-text with probability 1% we indeed mean that its
+chance of success is bigger than of the chance that you have by picking out
+a key from the space of all keys with the uniform distribution.  Notice
+that if the space of the possible keys contains more that 100 elements,
+then 1% is bigger than the uniform probability which is 1 / 2^k.
+
+First we must discuss more precisely what we mean saying that ``S can guess
+the correct clear-text with 1% of probability''.  There are indeed at least
+two different way to look at this.
+  - First we may mean that for a sequence of random encrypted messages, S
+    can guess with probability 1% the corresponding clear-text
+  - or we may mean that fixed an encrypted message c each time we
+    supply c to S we have a 1% of probability of having the clear-text.
+Note that these two situations are quite different, indeed in practice we
+are interested in decrypting a given encrypted message and not in
+decrypting a sequence of random encrypted messages. It is clear that the
+first situation is weaker than the second one as being able of doing the
+second one implies being able to do the first.
+
+Now, we are going to show that under some assumptions it is possible the
+vice-versa, that is if we are in the first situation then we are also in
+the second situation.
+
+Before going into the details it is worth to clarify what we mean when we
+say `sequence of random encrypted messages'. Well, with `random message' we
+mean a message chosen with a uniform distribution of probability in the
+space of the possible messages. More formally, we can think of a random
+message as a random variable with values on the set of the possible
+messages and uniformly distributed. With `sequence of random messages' we
+mean a sequence of such random variables IID. If M is a random message,
+E(M) is an encrypted random message, so a `sequence of encrypted random
+messages' is defined as expected.  Since we can assume that the E is a
+bijection we have that if M is a random message (uniformly distributed)
+then E(M) is uniformly distributed too.
+
+At this point we can make more precise our initial statement saying that we
+have an algorithm S such that given a sequence of random encrypted messages
+(IID) it can guess the clear-text with probability 1%.
+
+Consider now the case of RSA. Given a, b \in \naturals we have that E(ab) =
+E(a)E(b) \mod n, indeed E(ab) = ab^e \mod n = (a^e \mod n )(b^e \mod n) =
+E(a)E(b) \mod n.  So suppose that a is fixed and E(a) is given to the
+attacker.  The question now is: how can we generate a sequence of random
+encrypted messages whose clear-text would enable the attacker to discover
+a?  Well, the idea is the following.
+  - Create a sequence of random messages b1, ..., bn.
+  - Then compute the sequence c_i = E(a)E(b_i) = E(a b_i) which is randomly
+    distributed too.
+    (really? why? what if E(a) = 0 mod n? Resolution: very improbable)
+  - Then if we supply the sequence { c_i } to S and the sequence is
+    sufficiently long then S will be able to find the clear-text ab_i for
+    at least one of the elements of the sequence.
+  - Compute the division ab_i / b_i to obtain the clear-text a.
+    (NOT CLEAR HERE: again what if we are not in Z*_n? Resolution: very
+    improbable. Notice that here we are describing a possible attack, i.e.,
+    that works in most but not all cases.)
+
+NOTE (How to compute the division in Z*_n?)
+Let a, b, c \in Z*n. We define:
+
+  a / b = c \mod n \iff a = bc \mod n.
+
+Now the question is: given n, a and b, how can we compute the result of the
+division c in Z*_n? is it defined on every pair of elements of Z*_n?  Since
+b \in Z*_n it follows that it has an inverse d \in Z*_n such that bd = 1
+\mod n. But then it hold also that: (bd)a = b(da) = a \mod n, i.e., a / b =
+ad. This means that the division operation is always defined. Moreover,
+since both a and d are in Z*_n also their product is in Z*_n, i.e., the
+division operation is closed in Z*_n.
+
+What about the length of the sequence of trials? Let p be the probability
+that S guesses correctly. Under these hypothesis, S will make its first
+correct guess after 1/p tests in mean. If p = 1 / 2^k, where k is the
+number of bits of the key then we have to perform approximately 2^k tests,
+and obviously this task can not be done in polynomial time wrt k.  Instead,
+if the probability p is polynomial in k, say p = k^c for some constant c,
+then we have to do approximately k^c trials before finding a correct
+clear-text (which is still a polynomial quantity wrt k.)
+
+Thus we can conclude that if S can correctly guess the clear-text with a
+probability polynomial in the size of the key k, then it is possible to
+build another algorithm that is able to guess the clear-text with
+probability arbitrarily near to 1 and that still runs in polynomial time.
+
+In practice it becomes useful the converse of this implication: if exist no
+polynomial algorithms that can guess the clear-text with probability
+arbitrarily close to 1, then there exist no polynomial algorithms that do
+the same with a probability polynomial in the size of the key (eg: 1%).
+
+ENCRYPTING A BIT
+
+In this section we want to describe a method for encrypting a single bit
+that is provable secure. Before continuing it is worth to clarify what we
+mean by `provable secure'. We have already seen a couple of methods that
+are based on one-way functions: function whose inverse is believed hard to
+compute. By provable security we mean that a polynomial attack to our
+method can be transformed in a polynomial algorithm that computes the
+inverse of one of these one-way functions. In this case all our confidence
+in the method relies on our confidence on the fact that computing the
+inverse of the one-way function is effectively an hard task. Notice that
+this is not completely true for the RSA and DH encryption schemes as these
+requires additional assumptions (the RSA- and DH- assumptions,
+respectively, which are conjectures as they have not been proved) to be
+able to transform an attack to the method to an algorithm that computes the
+inverse of the one-way function.  Recall:
+  - DH-assumption: to compute g^{xy} from p, g, g^x, g^y requires to know x
+    or y, i.e., to compute the discrete logarithm of g^x or g^y.
+  - RSA-assumption: to compute m from m^e, n, e requires to factorize n.
+In the following method we rely again on the knowledge of the factorization
+of a composite number n as a trap-door information to invert the encryption
+function. In this case we make another assumption, that we shall call the
+`quadratic-residuosity' assumption:
+  - QR-assumption: given two distinct primes p and q and said n = pq, and
+    said y \in Z*_n with (y/n) = 1, to check whether y is a square or not
+    in Z*_n you must know the factorization of n.
+
+To start let p and q be random but distinct prime numbers and for
+convenience of notation let n = pq.  Then chose a random y non-square in
+Z*_n with Jacobi symbol 1, i.e., gcd(y, n) = 1 and (y / n) = 1.
+
+To choose such an y you can proceed as follows: pick out a random y in Z_n,
+check if it is co-prime wrt n and then since you know the factorization of
+n, compute the Legendre symbol wrt the factors of n, (y/p) and (y/q).  For
+every trial you have probability \phi(n)/n = (p-1)(q-1)/pq of guessing an
+element of Z*_n, which is very near to 1 as p and q grow.  By using the
+Chinese Reminder theorem you can see that 1/4 of the elements of Z*_n are
+squares, 1/4 are non-squares with Jacobi symbol 1 and the remaining 1/2 are
+non-squares with Jacobi symbol -1. Thus you have approximately 25% of
+chances to guess a correct y for every trial. To check that y is a
+non-square with Jacobi symbol 1 you must check that (y/p) = (y/q) = -1.
+Moreover, these checks, gcd(y, n) = 1 and (y / p) = (y/q) = -1, have
+polynomial complexity.
+
+In this encryption schema the public key is the pair (n, y) (used for
+encryption) whilst the private key is the pair (p, q) (required to
+decrypt). The encryption function is defined as follows, E : { 0, 1 } ->
+Z*_n and it is probabilistic: each time we have to encrypt a bit, we draw a
+random x \in Z*n, then:
+
+  E(0) = x^2,
+  E(1) = yx^2.
+
+Notice that, taken b \in {0, 1}, it holds that E(b) is a square in Z*_n if
+and only if b = 0.  However for every b \in {0, 1}, the Jacobi symbol of
+E(b), (E(b)/n), is always 1.  This explains why we have chosen y to have
+Jacobi symbol 1: if (y/n) = -1, then an attacker can compute (E(b)/n)
+(recall that to compute the Jacobi symbol it is not necessary to know the
+factorization of n). If the attacker sees that (E(b)/n) = -1 then he can
+conclude that b = 1; thus this would disclose to the attacker half of the
+bits of the clear-text!  Instead, by choosing y such that (y/n)=1 this
+cannot happen.  The decryption relies on the fact that knowing the
+factorization of n it is possible to compute if E(b) is a square or not,
+that is, if b is 0 or 1.  Since p and q are distinct primes, E(b) is a
+square in n if and only if it is a square in p and q, i.e. if (E(b)/p) and
+(E(b)/q) are both 1.  (Again from the Chinese-Reminder-Theorem).
+
+Note that if x is chosen uniformly in Z_n then yx^2 is uniformly
+distributed among the non-squares of Z_n. Indeed x is chosen as an element
+of Z*_n and x^2 is again in Z*_n. The multiplication for a fixed element in
+Z*_n is a bijection, i.e., a permutation. This means that if Y is a random
+variable uniformly distributed on Z*_n, then Yx^2 is uniformly distributed
+on Z*_n too. This is important, because a non uniform distribution of the
+cypher-text E(b) could allow an attacker to gain some information about the
+clear-text.
+
+Basically, the security of this method is based on the following idea:
+  1. to decrypt E(b) the attacker must check if E(b) is a square in Z*_n
+  2. and this requires the computation of ( E(b) / p ) and ( E(b) / q )
+  3. which in turns requires the factorization of n,
+  4. and the problem of factorization is hard.
+Now we are going to make these points more rigorous in order to show how an
+attack to this method can be turned into an DPT algorithm to solve the
+quadratic-residuosity problem without the knowledge of the factors of n.
+
+Let us start by assuming that exists a PPT S that from the public key (n,
+y) is able to break the method, i.e., given a sequence of encrypted random
+bits, S is able to correctly guess b from E(b) with probability p. Now we
+are going to show that then there exists an polynomial time algorithm that
+decrypts correctly with probability arbitrarily close to 1.  More
+precisely: let { b_i }_i be a sequence of bits drawn randomly and let {
+E(b_i) }_i the result of their encryption.  Then, if we supply the sequence
+{ E(b_i) }_i to S, it will be able to guess the clear-text bits b_i with
+probability p.  Recall that the encryption is probabilistic (due to the
+choice of x) thus E(b_i) is not completely determined from b_i; so the
+situation described here is quite different from the one described above
+for the RSA as here the attacker have no methods to directly check whether
+a guess of S is correct or not. This is due to the fact that here the
+encryption routine E uses a random element x for every encrypted bit.
+However, the attacker could use an indirect technique.  Basically, if we
+perform n trials of using S to decrypt the same bit and if the cypher-text
+sequence is distributed accordingly to the expectations of S ---i.e.,
+uniformly among the elements of Z*_n that have Jacobi symbol 1--- then we
+expect that approximately np times we get the correct answer. So, if p \neq
+1/2 then in the sequence output of S it is possible to measure a difference
+between the 0s and the 1s and from this to understand what was the value of
+the encrypted bit.
+
+Consider this situation: the attacker A, who knows the public key (n, y),
+intercepts an encrypted bit E(b) = z. Then A produces a sequence of random
+squares, R1, ..., Rm, and then he supplies to S the sequence of trials zR1,
+..., zRm.  But this does not work. Why? Well, because the sequence zR1,
+..., zRm is not uniformly distributed among the elements of Z*_n having
+Jacobi symbol 1: indeed they are all squares or all non-squares depending
+on if z is a square or not. A possible solution to this objection is the
+following: use the y, which is part of the public key, and which is a
+non-square with Jacobi symbol 1. Chose k random bits { b_i } and send to S
+the sequence: zR_i if b_i = 0, zyR_i if b_i = 1. This sequence has the
+required distribution; the attacker must flip the bits of the output of S
+corresponding to the bits b_i = 1.  By the use of Chernov bounds it is
+possible to see that if p is polynomially (wrt k) distant from 1/2, then
+with a polynomial (wrt k) number of trials it is possible to obtain a
+probability that is arbitrarily (exponentially) close to 1 of guessing
+correctly the encrypted bit.
+
+But to prove that this protocol is secure this does not suffice. Indeed, S
+takes n, z but also y, so, to show that breaking this protocol means to
+solve the QR-problem, the idea is that we have to prove that it is not
+possible to take any advantage from the knowledge of y.  To do this, now we
+build another algorithm R that takes as input only n and z and that it can
+tell if z is a square in n by first guessing an y and then supplying (n, y,
+z) to S.  Of course the difficult part is not in the guessing of y, as we
+have already seen there are about 25% of chances that a random element of
+Z*_n is a good y; the difficult part is to check if the guess is correct.
+Recall indeed that, under the QR-assumption, we have no way of checking if
+an element of Z*_n with Jacobi symbol 1 is a square or not without knowing
+the factors of n.  Now, the obvious observation is that if the guess y' is
+wrong, i.e, if y' is a square, then the encryption algorithm with the
+public key (n, y') will simply not work as E(b) will always be a square.
+The idea then is to try with an y \in Z*_n and then analyze the
+distribution of the output of S with respect to the two sequences { R^2_i }
+and { y'R^2_i } using the public key (n, y'): if it is possible to measure
+no differences between the distributions of the output then y' is a square,
+that is, the guess was wrong.
+
+However, the focal point of the whole strategy is that, by Chernov bound,
+by repeating the experiments a polynomial number of time it is possible to
+make the probability of success arbitrarily close to 1.
+
+At the end of all this discourse, by reasoning by modus-tollens we can use
+the converse: as long as there are no polynomial time algorithm able to
+solve the QR-problem (without knowing the factorization of n) then no
+attacks to the described encryption schema are possible, that is, this
+encryption schema is provably secure (under the QR-assumption described
+above).
+
+ENCODING SEQUENCES OF BITS
+
+In this section we want to present a method to encrypt sequences of bits
+based on the encryption schema described above.  The idea is very basic.
+Given a message m expressed as a sequence of bits, m = m_1, ..., m_n and an
+encryption schema E defined on single bits we define a new encryption on
+the whole message as E(m) = E(m_1), ..., E(m_n), that is, the cypher-text
+of m is the concatenation of the cypher-texts of its bits.
+
+At this point it is interesting to define a rigorous notion of security
+for such an encryption schema. Our goal is to show that if no PPT algorithm
+exists that is able to break the encryption on a single bit then no PPTa
+exists to break the encryption of a message performed as just described.
+As usual, to show it we proceed by showing the converse of this statement.
+
+But before starting we have to reason a little about the nature of the
+problem that we are going to approach. What does it mean that we want to
+decrypt a cypher-text E(m)? Well, quite simply E(m) is a sequence of bits
+and from that we have to extract sufficient information to recover the
+clear-text m.  However, this fact is not so simple to represent in
+mathematical terms.  Consider for example what usually happens in the
+computability-complexity theory: problems are expressed in the form of a
+binary decision, they output a single bit: a yes/no choice.  So as to
+simplify the problem we observe the following fact: every algorithm that
+pretends to be able to decrypt E(m) must also be able to extract 1 bit of
+information of m from E(m). Notice that we are not talking about some
+specific bit of the sequence m; I'm talking of any binary predicate that
+can be defined on the set of (clear-text) messages. This discourse lead us
+to the concept of ``distinguisher'', that is, an algorithm that takes as
+input a (cyper-text) message an outputs a single bit. We use the name
+``distinguisher'' to stress the fact that its only action is to distinguish
+messages: those on which it outputs 1 and those on which it outputs 0.  We
+will show that no distinguisher are possible; this implies quite clearly
+that no decrypting algorithm are possible.
+
+Let:
+  - E be the encryption algorithm,
+  - k the size of the key,
+  - m a generic clear-text message,
+  - D a PPT decision algorithm that is supposed to be able to decrypt
+    messages.
+E is a probabilistic algorithm so it takes as arguments the clear-text
+message and a random number. Let X be a v.a. uniformly distributed.  We
+denote p(m) = \prob( D(E(m, X)) = 1 ), that is p(m) is the probability that
+the decision algorithm D returns 1 on a cypher-text of m.  Now we proceed
+with some definitions.
+
+DEFINITION
+Let m, n be two messages.  We say that "E hides m and n to D" if:
+
+  \forall c > 0 \itc
+  \exists k_c > 0 \itc
+  \forall k > k_c \itc
+    |p(m) - p(n)| < k^{-c}
+
+We say that "E hides to D" if:
+
+  \forall m, n \in \messages \itc
+    E hides m and n from D
+
+We say that "E hides" if:
+
+  \forall D \in PPT \itc
+    E hides to D.
+
+Informally, "E hides m and n to D" means that the difference between the
+two probabilities is definitely smaller than any polynomial (in the
+variable k, the length of the key.) We say that E hides to D if the above
+is true for every pair of messages.  We say that E hides if this is true
+for every PPT algorithm. Notice that when we write |p(m) - p(n)| we mean |
+\prob(D(E(m, X)) = 1) - \prob(D(E(n, Y)) = 1) | where X and Y are uniform
+i.i.d.
+
+In the literature the notion of security expressed by the statement "E
+hides" is also called IND-CPA, which is an acronym for "INDistinguishible
+under Chosen Plain text Attack": if the attacker is allowed to chose the
+messages m and n and some one else encrypt them producing the cypher-texts
+c and d, the attacker, knowing (m, n, c, d) is not even able to tell which
+between c and d is the cypher-text of m. Recalling the previous idea, "E
+hides" means that there exist no distinguisher able to distinguish to
+distinct messages m and n by looking at their cypher-texts c and d.
+
+Notice that the RSA schema does not satisfy this requirement, because the
+encryption method of RSA is not probabilistic whilst here to the same
+clear-text message m can correspond many different cypher-texts.  In this
+sense the RSA is weaker because if the attacker knows by other means that
+to a certain encrypted block corresponds some clear-text then he can deduce
+that to every other occurrence of that cyphered block corresponds the same
+clear-text; this is not possible with this method.
+
+First we start by writing exactly what we mean with IND-CPA secure. From
+the above definitions we have:
+
+  \forall D \in \PPT \itc
+  \forall m, n \in \messages \itc
+  \forall c > 0 \itc
+  \exists k_c > 0 \st
+  \forall k > k_c \itc
+  | p(m) - p(n) | < k^{-c}.
+
+We proceed by absurd, so we assume the negation of the thesis, which is:
+
+  \exists D \in \PPT \st
+  \forall m, n \in \messages \itc
+  \exists c > 0 \st
+  \forall k_c > 0 \itc
+  \exists k > k_c \st
+  | p(m) - p(n) | >= k^{-c}
+
+Informally, we are assuming that there exists a PPT algorithm D and two
+messages m and n, such that no matter how big we chose the key, the
+probability of distinguishing m and n from their cypher-text is bigger than
+a quantity polynomial in k.  Let
+
+  m = m_1, ..., m_l
+  n = n_1, ..., n_l
+
+where m_i is the i-th bit of m and l is the number of bits of m.  (We are
+assuming that the two messages have the same length; however, this does not
+reduce the generality of the discourse. WHY?) Then we define the function:
+
+  \forall i \in { 0, ..., l } \itc
+    m(i) = m_1, ..., m_i, n_{i+1}, ..., n_l;
+
+That is, m(i) is composed by the first i bits of m and the last (l-i) bits
+of n.  Notice that m(0) = n and m(l) = m.  Then we have:
+
+  | p(m) - p(n) |
+  = | p(m(0)) - p(m(l)) |
+  = | \sum_{i = 0}^{l-1} p(m(i)) - p(m(i+1)) |
+  <= \sum_{i = 0}^{l-1} | p(m(i)) - p(m(i+1)) |
+  <= l * \max { | p(m(i)) - p(m(i+1)) |, i = 0, ..., l-1 }
+
+Since l is a constant, this means that:
+
+  \exists D \in \PPT \st
+  \forall m, n \in \messages \itc
+  \exists c > 0 \st
+  \forall k_c > 0 \itc
+  \exists k > k_c \st
+  \exitst i \in { 0, ..., l-1 } \st
+  | p(m(i)) - p(m(i+1)) | >= k^{-c}
+
+Notice that for every i, m(i) and m(i+1) differ for at most one bit; so we
+have a distinguisher for two messages that differ at most of one bit.  Let
+us call m+ = m(i+1) and m- = m(i) the two adjacent messages that maximize
+the distance. As this distance is not null, then these two messages are
+Then D is able of distinguishing a cypher-text of m+ from a cypher-text of
+m- with polynomial probability, and then, by repeating the experiment a
+polynomial number of times, with a probability arbitrarily close to 1.
+Now, idea is that we can use m+ and m- to decrypt a bit encrypted with E.
+Let z be the cypher-text of a bit encrypted using the schema described in
+the previous section.  The idea is to supply to D the cypher-text: E(a_1),
+..., E(a_{n-1}), z, ..., E(b_l); then D will tell which is the
+corresponding plain-text, m+ or m-, and from this it is possible to
+discover the plain-text of z.  Of course, as in the case of the encryption
+of a single bit, by using probabilistic algorithms, we must pay attention
+to the distribution of the input.  We have to supply to D a sequence of
+cypher-texts:
+
+  E(m_1, X_11), ..., (X_1t)^2*z, ..., E(n_l, X_1l)
+  E(m_1, X_21), ..., (X_2t)^2*z, ..., E(n_l, X_2l)
+  ...
+  E(m_1, X_a1), ..., (X_at)^2*z, ..., E(n_l, X_al)
+
+One final note: a problem of this method is the `malleability', that is
+since the cypher-text of a sequence of bits is simply the concatenation of
+the cypher-text of the single bits then an attacker that knows some
+encrypted messages can forge new messages without that the receiver can
+discern it except from the semantic of the encrypted message.
+
+FLIPPING A COIN OVER THE NETWORK
+
+In this section we consider the problem of flipping a coin over the
+network, that is, our aim is to present a protocol that allows two peers on
+a network to conduce an aleatory experiment in such a way that every honest
+observer is guaranteed from the possible frauds of other non-honest
+players.  Let us introduce two actors: say A for Alice and B for Bob. The
+idea is to let the two actors to flip a coin privately and then find a
+protocol that allows them to exchange their result and allows them to
+compute the result of a ``shared'' coin flip so that the probability of the
+two possible outcomes, head or cross, is always 1/2.  To formalize this,
+let us call coin_A the result of the shared experiment observed by Alice
+and coin_B be the result of the shared experiment observed by Bob.  By
+definition, we say that an actor is honest if he respects the rules of the
+protocol.  Otherwise, we say that the actor is non-honest. The idea is that
+the protocol guarantees that if the two actors are both honest, then the
+coin flip is unbiased, however, an actor may not respect the protocol in
+order to affect the result of the shared experiment with the goal of to
+taking advantage of it.  For these reasons, we say by definition that a
+coin flip is _correct_ if:
+
+  \forall A, B \in \honest \itc
+    coin_A = coin_B
+    \and \probability(coin_A = 0) = \probability(coin_A = 1) = 1/2.
+
+However, if we assume that both the actors are honest, it is quite easy to
+find a protocol that guarantees the correctness of the coin flip.  The
+problem arises when we assume that one actor is honest and the other is
+dishonest.  The question is: also in this case is it possible to find a
+protocol that guarantees the correctness of the coin flip?  Notice that we
+are not interested in the remaining case ---that is, when both the actors
+are dishonest--- because our aim is only to guarantee honest players.
+Consider the following schema:
+
+  Alice: $ p,q \in \primes, p \neq q
+         computes n = pq,
+         $ z \in Z*_n, such that \jacobi(z, n) = 1.
+         That is, two distinct prime numbers are chosen randomly and also
+         an element of Z*_n with Jacobi symbol 1.
+         Send (n, z) to Bob.
+  Bob:   $ b \in { 0, 1 }
+         That is, a random bit is chosen.
+         Send b to Alice.
+  Alice: Send (p, q) to Bob.
+
+The protocol defines the value of the shared coin flip as:
+
+  OUT = b \xor [z is a square in Z*_n].
+
+Now, let us make some considerations about this protocol.  First, if the
+two actors are both honest, then we can assume that b is distributed
+uniformly over { 0, 1 } and also z is distributed uniformly over the
+elements of Z*_n that have Jacobi symbol 1, this means that the probability
+that z is a square is exactly 1/2.  Then, also the result of the shared
+coin flip will be distributed uniformly over { 0, 1 }.  Moreover, since the
+two actors are both honest, they have the same data and they will follow
+the same procedure, then they will observe the same result, that is, coin_A
+= coin_B.
+
+More troublesome is the case when only one of the two actors is honest.
+Notice that the protocol does not treat symmetrically the two actors, then
+the two cases, A honest and B dishonest, A dishonest and B honest, must be
+considered separately.
+
+If Alice is dishonest, she can try to bias the coin flip by sending to Bob
+an n such that n \neq pq or she can produce p and q non primes. However,
+since Bob at the end of the coin flip knows n, p and q, he can check
+whether Alice respected the protocol. Otherwise, Alice can act on the
+choice of z. But also in this case Bob can check whether z \in Z*_n and
+\jacobi(z, n) = 1.  Alice can also chose z non randomly, on non uniformly
+distributed, however, since Bob is honest, he will chose b uniformly and
+then the final result, defined as the \xor of the two, will be again
+distributed uniformly. This means that if the protocol reaches its end, a
+dishonest Alice cannot condition at all the result of the experiment.  Some
+interesting (yet simple) calculations. Let X and Y be two binary
+independent a.v.  such that X is uniformly distributed, i.e., \prob(X = 1)
+= \prob(X = 0) = 1/2, whilst \prob(Y = 1) = p then we have \prob(X \xor Y =
+1) = \prob(X \xor Y = 0) = 1/2, that is, X \xor Y is uniformly distributed.
+Indeed:
+
+  \prob(X \xor Y = 0)
+  = \prob(X = Y)
+  = \prob(X = 0, Y = 0) + \prob(X = 1, Y = 1)
+  = \prob(X = 0) \prob(Y = 0) + \prob(X = 1) \prob(Y = 1)
+  = 1/2 * (1-p) + 1/2 * p = 1/2
+
+Otherwise, if Bob is dishonest, then the only way that he can try to cheat
+is by trying to guess if z is a square of Z*_n without knowing the
+factorization of n. However, the QR-assumption says that this is not
+possible for any PPT, more formally, any PPT has probability of guessing
+correctly that is only exponentially distant from 1/2.  Or, said k the
+number of bits of n:
+
+  \forall A \in \honest \itc
+  \forall B \in \dishonest \itc
+    | P(coin_A = 0) - 1/2 | < k^{-\omega(1)}
+
+However, it must be noticed that between the possible ways that A can cheat
+we do not have considered the following.  There is a point in the protocol
+when A knows the result of the ``shared'' coin flip and B does not and the
+protocol says that at this point A must send the factorization (p, q) to B
+to let him know the result too.  However, if A sees that the result of the
+coin flip is not convenient to her, she can simply drop the last packet and
+try to convince B to restart the protocol (for example with the excuse of a
+network failure.) If B accepts, then A can repeat this expedient as long as
+the experiment results convenient to her.  The point is that there are no
+ways to come out of this.  Consider the following informal reasoning: there
+exists always a moment when only one of the actors knows the answer.
+Indeed, in the protocol there is certainly a _last_ message, because the
+protocol is supposed to run in a finite amount of time, then exchanges a
+finite number of messages; on the other hand, at least one message is
+required otherwise no information can be exchanged an no ``shared''
+experiment can be performed. Consider the instant before sending last
+message.  Suppose that A has to send it. At this point A must know the
+result of the experiment because she will receive no more messages. But at
+this point B certainly does not know the result, otherwise this supposed
+last message would not be necessary, and then it can be removed from the
+protocol.  There is also a more general theorem that generalizes the
+situation to more participants and it says that if a half or more of the
+actors behave dishonestly then no fair coin flip over the network is
+possible.
+
+COIN FLIPPING INTO THE WELL
+
+After all, the limitation that we have just described is not so relevant in
+some situation, at the point that this protocol is actually used and in the
+literature it is commonly referred to as the ``Coin Flipping into the
+Well''.  To explain informally this limitation, you can imagine a situation
+where Alice is near a well and Bob is far away.  Bobs throws a coin into
+the well but from there he cannot see the result, however Alice can see it,
+and once she has seen it she can decide whether or not allow Bob to come
+closer to see the result but in any case she can't change the result of the
+coin flip because the coin is fallend inside the well and then it is
+outside of reach.
+
+OBLIVIOUS TRANSFER (adj. heedless, unaware, ignorant, blind)
+
+As we have anticipated, there are situations where it is not necessary that
+Bob sees the result of the coin flip.  Consider for example a raffle: Bob
+owns something that is worth 1K dollars and he wants to sell it but Alice
+has only 500 dollars.  Then they decide to play a game: they flip a coin,
+if Bob wins he gets the money of Alice without giving her the object,
+otherwise if Alice wins, she pays her moneys receiving Bob's object.  The
+idea is to embed the object into the coin that Bob throws into the well
+near Alice in such a way that Alice can take it if and only if she wins the
+game: under these hypotheses Bob does not need to see the result of the
+coin flip. However, the protocol must be fair enough to forbid Bob to cheat
+and this sense, the algorithm for coin flipping seen above is not
+satisfactory. Consider then following protocol.
+
+  Bob:    picks out $p, q \in \primes, p \neq q
+          Let n = pq. Send n to Alice.
+  Alice:  selects a random element x of Z*_n.
+          Computes y = x^2.
+          Returns y to Bob.
+  Bob:    who knows the factorization of n,
+          then he computes the two roots of y, x_1 and x_2,
+          selects randomly one of them, x_3 and returns it to Alice.
+
+The secret is represented by the factorization of n. In the last message,
+Bob, with probability 1/2 will return the root of y that Alice already has.
+In this case, Alice has lost, as she cannot compute the factorization of n
+from it.  In the other case, if Bob returns the other root of y, then
+Alice, using one of the above Lemmas, can compute the factorization of n,
+as GCD(n, x-x_3) = p and GCD(n, x+x_3) = q.  In practice, the factorization
+of n can be the private key of the RSA schema used to encrypt the actual
+secret.  Notice that Bob does not know what of the two root of y owns
+Alice, then he cannot behave dishonestly by returning that root.
+
+HARD CORE PREDICATES
+
+Consider now the following method for the coin flipping on the net that is
+based on the discrete logarithm.
+
+  Alice and Bob agree on a p \in \primes and g generator of Z*_p.
+  Alice:  $ x \in Z_p*,
+          computes z = g^x,
+          returns z to Bob.
+  Bob:    $ b \in { 0, 1 },
+          returns b to Alice.
+  Alice:  returns x to Bob.
+
+The result of the coin flip is computed as:
+
+  OUT = b \xor [ x > (p-1)/2 ].
+
+Notice that Z*_p has exactly (p-1) elements, thus if x is selected
+uniformly, we have that \prob(x > (p-1)/2) = 1/2.  Then also in this case
+if both actors behave honestly then the outcome of the coin flip is
+distributed uniformly.  The only way Alice can be dishonest (ok, except for
+the `coin flip in the well' described above) is the choice of x, which can
+be not uniform, but since Bob is honest and his choice of b is uniform also
+the result of the coin flip is uniform.  On the other hand, the only way
+for Bob for being dishonest is to find out whether x > (p-1)/2 but, as
+shown by the following section, this would require to solve the
+discrete-logarithm-problem. In other words, a machine that can compute the
+predicate
+
+  B(g^x, g, p) = ( x >= (p-1)/2 )
+
+knowing only (g, g^x, p) can be turned into a PPT machine that computes
+discrete logarithms. Thus, if we assume that the discrete logarithm is not
+doable in PPT we can conclude that no PPT Bob can cheat in the above
+protocol. In the literature, this kind of binary predicates is called
+``hardcore predicate''. Results exists that prove that every one-way
+function has at least one binary hardcore predicate, that is a binary
+predicate B such that it is possible to turn a machine that computes B into
+a machine that computes the inverse of the one way function with only a
+polynomial overhead. Notice that not every binary predicate is an hardcore
+predicate. In this particular case consider for example the predicate
+b(g^x, g, p) that returns 1 iff x is odd. In fact, x is even iff g^x is a
+square in Z*_p and this can be checked in polynomial time as the Jacobi
+symbol (g^x / p).
+
+PROOF
+In the first part of the proof we show that a DPT machine that computes
+B(g^x, g, p) can be turned into a DPT machine that computes the discrete
+logarithm.  In the second part of the proof we extend this result to the
+case of PPT machines.
+
+We have already seen that \phi(p) = (p-1) and in Z*_p every square can be
+written as g^{2i} where g is a generator of the group.  Notice now that in
+Z*_p every square g^{2i} has two distinct roots, g^i and -g^i = (-1)g^i =
+g^{(p-1)/2}g^i = g^{i + (p-1)/2}, where quite obviously i \neq i + (p-1)/2
+mod (p-1) and thus g^i \neq -g^i. The root g^i is usually called the
+``principal'' square root of g^{2i}. Now, suppose without loss of
+generality that 2i < \phi(p) = (p-1). Then we have i < (p-1)/2 and i +
+(p-1)/2 >= (p-1)/2.  Then it can be seen the link with the predicate B: let
+x \in { g^i, -g^i }, then x is the principal square root of g^{2x} if and
+only if B(x, g, p) = 0. Now it is clear that by exploiting B we can build a
+machine that computes the principal square root of a square of Z*_p with
+a polynomial overhead. Consider indeed the procedure:
+
+  PSQRT(g^{2i}, g, p)
+  {
+    x = SQRT(g^{2i}, g, p)
+    if (B(x, g, p) == 1)
+      r = -r
+    return r
+  }
+
+where SQRT computes one of the two squares of g^{2i}; this is DPT (Don't
+know how, now it does not matter.)  Now we show that by exploiting PSQRT we
+can build, with a polynomial overhead, a machine that computes the discrete
+logarithm. Consider the following procedure:
+
+  DL(g^x, g, p)
+  {
+    y = g^x
+    while y != 1  // 1 = g^0
+      output(b(y))
+      if b(y) == 1
+        y = y * g^{-1} // g^{-1} = g^{(p-1)/2}
+      y = PSQRT(y)
+  }
+
+where the binary predicate b() was the one defined above, that is, b(g^t) =
+1 iff t is odd; as already said this can be computed by the Jacobi symbol
+in DPT.  Notice that if b(y) = b(g^{t}) = 1 then t is odd and y * g^{-1} =
+g^t * g^{-1} = g^{t-1} where t-1 is even.  So, informally, these two lines
+of the DL procedure are needed to set to zero the least significant bit of
+t, where y = g^t, without changing the other bits.  Notice that when the
+execution reaches the call to PSQRT y is always a square of Z*_p, say y =
+g^{2i}. Then, as shown above, PSQRT(y) = PSQRT(g^{2i}) will return g^i.
+Informally, you can think at this step as an operation that shifts of one
+position to the right all the bits of 2i, the exponent of g^{2i} = y.  So,
+during its the execution, the DL(g^x, g, p) will print in output all the
+bits of x in order of increasing weight.  Notice however that without B
+this would not have been possible as in general i and i + (p-1)/2, the
+exponents of the two roots of g^{2i}, are represented by completely
+different sequence of bits.  So, to obtain the ``shift'' effect it is
+necessary to chose the principal square root.
+
+Now we extend the result just obtained to the case of B being implemented
+by a PPT algorithm.  Let A \in PPT be the machine that computes B and let P
+be its probability of success, i.e., P = \prob(B(X^2, g, p) = A(X^2, g, p))
+where X is an a.v. uniformly distributed over Z*_p (note: P the
+probability, not to be confused with p, the prime number). As usual, to
+obtain the correct output using probabilistic algorithm we have to repeat
+the execution many times. So, the additional difficulty that we must handle
+with when coping with probabilistic instead of deterministic algorithms is
+how to generate random experiments: given an instance of the problem, say
+(g^i, g, p), we have to find a sequence of uniformly distributed
+instances of the problem, say { (g^j, g, p) }_j, such that the solution
+of these allows us to derive the solution of the original instance (g^i,
+g, p). In this case by uniformly distributed we mean that the { g^j }_j
+must be distributed uniformly among the elements of Z*_p; from what we have
+already seen this means that the exponents { j }_j must be uniformly
+distributed in [0, (p-1)).
+
+The basic strategy here is to pick out a random j \in [0, (p-1)) and
+consider the problem of finding the discrete logarithm of g^{i+j} =
+g^i*g^j.  Since in Z*_p the multiplication is always invertible we have
+that g^{i+j} is uniformly distributed. At this point, if someone tells us
+the value of the exponent i+j then by subtracting j we can obtain i, the
+solution of the original problem. However, if we assume that P = 1/2 +
+n(k), where 1/n(k) is polynomial in k, we found that the probability that
+DL works is P^k = (1/2 + n(k))^k. This means that in mean we have to do
+1/(P^k) = (2/(1 + 2n(k)))^k experiments but this quantity is exponetial in
+k and it approches 2^k when k grows. So, this approach simply does not
+work.
+
+Then the idea is to work directly on the PSQRT procedure, which has the
+same property of success of A (quite easily because PSQRT calls B only
+once).  This is the situation: we are given a square g^{2i} of Z*_p. How to
+generate independent experiments? Pick out a j \in [0, (p-1)/2) and use
+g^{2(i + j)} = g^{2i} * g^{2j}. Once we get the principal square root
+g^{i+j} we can divide by g^j to obtain g^i, that is, the solution of the
+original problem: g^{i+j} * g^{-j} = g^i.  However, at this point we must
+be very careful as there is a subtle problem.  Notice indeed that if 2(i +
+j) < p-1, then i+j < (p-1)/2 so effectively g^{i+j} is the principal square
+root of g^{2(i+j)}.  On the other hand, if 2(i+j) >= p-1 then it will be
+2(i+j) = 2m + p-1, where 2m < p-1.  Notice however that 2(i+j) =_{p-1} 2m
+does not imply that i+j =_{p-1} m (notice that p-1 is even!).  This means
+that from the principal square root g^m of g^{2m} = g^{2(i+j)} it is no
+more possible to compute the principal square root g^i of g^{2i}.
+Informally, this different behaviour is due to the fact that in the former
+case it is not necessary to use the modulo in the exponent.  However, if
+2(i+j) < p-1 it is all right.  So, consider the following.  Let l be a
+quantity polynomial in k.  Now assume to divide the interval [0, (p-1)/2)
+in l sub-intervals of equal length. Choose j randomly in the intervals { 1,
+..., l }, that is in [ (p-1)/2l, (p-1)/2).  If i is in the first
+sub-interval [0, (p-1)/2l), then i + j < (p-1)/2, then 2(i+j) < p-1.  Then
+in this the good case.  However, we are assuming that x is in the first
+sub-interval; if this is not the case the PSQRT will simply fail to give
+use the correct answer.  But notice that l is polynomial in k, then we can
+simply translate i of some intervals to the left and try for every
+interval.  g^{t(p-1)/(2l)} for t \in { 0, ..., l }. For at least one of
+these t, the x will be placed in the first interval, then the above
+procedure will succeed with probability 1/2 + n, then, repeating the
+experiments and choosing the root that is most frequent it will be possible
+to compute PSQRT(g^{2x}) with overwhelming probability. (see Chernov bound)
+
+If P is overwhelming, i.e., exponentially near to 1 wrt k, say P =
+1-2^{-k}, then, when k becomes large, the probability that DL works
+correctly is, (1-2^{-k})^k >= 1 - k * 2^{-k} >= 1/2. Then by repeating the
+experiment, that is by calling DL, a polynomial number of times (2 in
+mean), we will be able to compute the discrete logarithm.  Recall that the
+exponentiation is DPT, so given (z, g, x, p) we can verify in DPT if z =
+g^x mod p.  This point is fundamental because it means that the output of
+DL can be verified in DPT so we do not need mad things like those seen in
+the encryption of a bit above.
+
+A final note. This protocol is provable secure as we have rigorously (well,
+at least we have tried) prove that an attack to it can be transformed into
+an algorithm to compute the discrete logarithm. One difference from the
+methods already seen (DH, RSA, encryption of a bit) is that in this case
+there are no other assumptions conjectured except for the difficulty of the
+discrete logarithm; this was not the case for the other methods (recall,
+the DH-, RSA- and QR- assumptions) for which it is not known if an attack
+to the method can be turned into an attack to the underlying one-way
+function.  In this case we have seen only a particular case of the theory
+of of hardcore predicates, whose results can be used, as we shall see, to
+build encryption methods that are provably secure, that is, that do not
+rely on any additional assumptions except for the existence of some one-way
+function (eg. product/factorization, exponentiation/logarithm).  Consider
+for example the QR-assumption. In some sense it can be seen as a binary
+predicate of the factorization problem, however there is no evidence that
+it is an hardcore predicate, that is, no proof exists that from a machine
+that answers to the question "is x a square in Z*_n" it can be built a
+machine that factorize n=pq with polynomial overhead.
+
+ENCODING A BIT WITH A SINGLE BIT
+
+The encryption schema that we have seen so far uses several hundred of bits
+to encrypt a single bit of the clear-text.  However, we have seen in the
+previous section the existence of hard-core predicates. With hard-core
+predicate we mean a binary predicate B defined over the solution of an hard
+problem (eg. the predicate B(x) = x > (p-1)/2 for the computation of the
+discrete logarithm of g^x in Z*p.) such that a PPT algorithm that computes
+this predicates can be transformed into a PPT algorithm that solves the
+original problem (eg. that computes the discrete logarithm.) (Can also be
+said as a binary predicate over the output of the inverse function of some
+one-way function.)
+
+At the end of this lengthy discussion we will end up having a pseudo-random
+number generator that is however deterministic an can be synchronized with
+a seed. This will be used as a source of random bits to be used with the
+one-time-pad encryption.
+
+PSEUDO-RANDOM NUMBER GENERATOR
+
+Now we want to find a way of producing sequences of random bits.  In
+particular we want to build a DPT algorithm that given an initial seed, it
+is able to produce a sequence of bits of arbitrary length that to any other
+PPT observer who does not know the seed is indistinguishable from a
+truly-random sequence.  We can think a truly-random sequence generator as
+PPT machine that draws the bits from independent experiments uniformly
+distributed over the set { 0, 1 }.  In this context, with ``security
+parameter'' we mean the length k of the seed, which can be thought as a
+sequence of k bits.  Informally, a pseudo random generator can be seen as
+an amplifier of the randomness contained into the k bits of the seed to a
+sequence of bits of arbitrary length.
+
+In this context we are not interested in defining what is the randomness of
+a given sequence of bits. Instead, we want to talk about the randomness of
+the sequences of bits generated by a given algorithm.  It also happens that
+there are two distinct ways of formalizing the idea of randomness of a
+generator and it can be proved that these are equivalent.  Let D \in PPT be
+an algorithm that we call ``the distinguisher''.  Informally, you can think
+to D as an algorithm that tries to distinguish sequences of bits generated
+by an algorithm G from a sequence of truly random bits. This said let:
+
+  P(k, l, G, D) = \prob( s \in_R {0,1}^k, D(G(s, l)) = 1 )
+
+Informally, this is the probability that by choosing uniformly a random
+seed of k bits and supplying it to the algorithm G to produce a sequence of
+l bits and then supplying this last sequence to the distinguisher D it
+outputs 1. Let:
+
+  P(l, D) = \prob( r \in_R {0,1}^l, D(r) = 1)
+
+be the probability that D outputs 1 given a uniformly chosen sequence of
+truly random bits.  With these definitions we can say that G is a PRNG if:
+
+  \forall k \in \naturals .   (for all possible key length)
+  \forall l \in \naturals .   (for all possible messages length)
+  \forall D \in PPT .         (for every possible PPT distinguisher)
+    | P(k, l, G, D) - P(l, D) | < k^{-\omega(1)}
+
+That is, the probability that D is able to detect the difference between a
+sequence generated by G and a truly-random sequence is smaller than any
+polynomial in k.  In the literature, this idea is commonly referred with
+the name `ind cpa', which is the acronym for ``indistinguishable under
+chosen plain text attack''. Indeed you can imagine this as a game where
+the attacker choses the sequences to supply to the distinguisher.
+
+Now the second definition of PRNG. Informally, it says that G is a PRNG if
+any PPT ``predictor'' that does not know the seed s, provided with the
+sequence of the first n bits generated by G, can guess correctly the value
+of the n+1-th bit produced by G(s) with a probability that is far from 1/2
+of a quantity exponentially small wrt k.  More formally, let G \in DPT; G
+is a PRNG when:
+
+  \forall s \in {0,1}^k .   (the seeds)
+  \forall n \in \naturals . (the length of the initial sequence of bits)
+  \forall A \in PPT .       (the PPT predictor)
+    | P(G(s, n+1, 1) = A(G(s, 0, n))) - 1/2 | < k^{-\omega(1)}
+
+It can be seen that these two definitions of PRNG are equivalent. This
+result is particularly interesting because it shows that this notion of
+randomness does not depend on the order in which the generator G outputs
+the bits: applying any permutation we still have a PRNG.  Think to this in
+the following way: any permutation of a sequence of a.v.  i.i.d. is
+probabilistically equal to the original sequence.  To see that the two
+definitions are equivalent, informally, if we are able to predict the next
+bit of the sequence r then we can also distinguish the sequence (r, 0) from
+the sequence (r, 1) then, having a distinguisher for sequences of n-bits,
+we can build a distinguisher for sequences of n+1 bits and vice-versa.
+(This is not clear and far from being convincing.) Now we present a PRNG
+accredited to Blum-Micali.  Let p \in primes, g be a generator of Z*p and s
+\in { 0, 1 }^k.  Let:
+
+  x_0 = s \mod p
+  x_{n+1} = g^{x_n} \mod p
+  b_i = (x_i < (p-1)/2)
+
+Given m \in nat, G outputs the sequence of bits { b_i } in reverse order,
+that is: b_m, b_{m-1}, ..., b_0.  Notice that x_i is the discrete logarithm
+of x_{i+1} = g^{x_i}, then b_i = B(x_{i+1}), that is, b_i is equal to the
+value of the hard-core predicate previously seen on x_{i+1}.  Then a PPT
+predictor that is able to compute b_0 from b_1, ..., b_m, is also able
+to compute the hard-core predicate of the discrete logarithm.  In the
+previous section we have seen how this predictor can be turned into an
+algorithm that computes the discrete logarithm with polynomial overhead.
+In this sense we say that the present method is `provably random'.  From
+the first definition of random generator, it follows that by applying any
+permutation to the bits of the output of a PRNG we still have a PRNG.  Then
+G can also output the b_i's in the order that they are produced, that is of
+increasing i.  This means that G can work in ``streaming mode'' or without
+a prior knowledge of the length of the sequence that he has to output.
+
+Now we present a second method that is provable random. This one is based
+on the difficulty of factoring prime numbers an it is known with the name
+of its creators: BBS or Blum-Blum-Shoup.  Let p, q be distinct primes and n
+= pq. We have seen that finding squares in Z*_n is hard at least as
+factoring n; then, as long as factoring is hard, squaring is a one-way
+function. There is a theorem stating that the inverse of a one-way function
+has at least one hardcore predicate. Thus, the root operation in Z*_n has
+at least one hardcore predicate.  It can also be proved that for the root
+operation in Z*_n the LSB of the root is an hardcore predicate.  With this
+idea in mind, let s \in { 0, 1 }^k be the seed, a truly random sequence of
+k bits. Then we define:
+
+  x_0 = s;
+  x_{n+1} = (x_n)^2 \mod n;
+  b_n = LSB(x_n).
+
+This reasoning can be generalized: every time we have a one-way function
+then we have an hard core predicate, then we can use it to build a PRNG.
+However, the peculiarity of the BBS is that the squaring is a one way
+function with trapdoor: by knowing the factorization (p, q) of n it is
+possible to compute roots in DPT.  This fact can be exploited to define a
+public-key encryption schema where the private key is (p, q) and the public
+key is n.  Given a message m = m_1, ..., m_l, the encrypted message is the
+pair:
+
+  E(m, n) = (b xor m, x_l)
+
+In other words, we exploit the BBS PRNG as a source of random bits to be
+used with the one-time-pad.  Notice that the encrypted message contains
+also the last element of the sequence x_i: by knowing the factorization of
+n it is possible from this to compute all the other x_i, thus to obtain the
+initial seed and then to decrypt the message.  One notable benefit of the
+BBS over the RSA algorithm is that BBS can be classified as a probabilistic
+encryption. Notice indeed that the initial seed is chosen randomly by the
+author of the message. This is stored in the encrypted message as the
+element x_l. From a quantitative point of view this means that the
+encrypted text is bigger that the plain-text: the BBS is not deterministic
+as the same plain-text can be encoded by many different cypher-texts (n to
+be precise).  With the classical RSA, an attacker that wants to decrypt a C
+= E(M) can simply try a brute force attack C_i = E(M_i) until he finds an
+M' such that C = E(M') and thus M' = M. This attack is not possible with
+the BBS as the attacker has to guess also the correct seed. Moreover, BBS
+is defined bitwise, then there are no problems of malleability. Also, there
+are no BBS-assumptions or like. It can be proved that an attack to the BBS
+is an attack to the factoring. Informally, an attacker can try to obtain
+the initial seed x.  But in case of success, he would have computed the
+square root x_1.  Or he can try to break the PRNG without knowing the seed.
+But as we have seen, this would mean that he is able to factorize n.  This
+is not the case of RSA, where we have the RSA-assumption.
+
+RANDOM FUNCTIONS
+
+(Questo argomento lo puoi guardare sugli appunti del corso dove e`
+illustrato abbastanza bene, fatte salve le considerazioni che trovi a
+seguito, che non ho trovato nelle note ---e che forse sono solo il frutto
+della mia immaginazione).
+
+A PRNG, described in the previous section, can be seen as a function that
+produces random output: it takes as argument a seed and it outputs a
+sequence of bits. Once we fix its argument, the seed, the behaviour of the
+PRNG becomes completely deterministic.  However, for some kind of
+applications that we will explore next, it is necessary something slightly
+different. We want a ``family'' of functions indexed over a certain subset
+of naturals and each of these must behave as a PRNG.  In order to show that
+the applications that we will develop are provably secure (once again, this
+means that it is possible to prove that any attack to the application can
+be transformed with polynomial overhead in an attack to the underlying
+problem) we must require some conditions.
+
+(...)
+
+It is worth to notice that the above proof of provable security exploits a
+technique that we have already seen and which is quite common in this
+field.
+  - We start by assuming that there exists an attack to the method that
+    works with polynomial probability,
+  - then we break the computation into a polynomial number of elementary
+    steps such that at each step the underlying method is applied once.
+  - We show in some way that then there is a polynomial probability of
+    attacking at least one of these steps.
+
+Generally, when building complex protocols we proceed by composing simpler
+protocols. A proof of security of the final protocol relies on the security
+of the used building blocks and it must show that the additional structure
+does not leave extra power to the attacker, or, that the final product is
+weak as the weakest of its components.
+
+MESSAGES AUTHENTICATION
+
+The problem of messages authentication is quite simple: the idea is to find
+a protocol that allows Alice to send a message to Bob in such a way that
+Bob is secure that the sender is Alice, that is no other actors besides
+Alice can forge a message that Bob believes belonging to Alice.  Notice
+that at this point we are not dealing with the secrecy of the sent message:
+authentication is another matter.
+
+A possible way we can provide authentication is by using random functions.
+Suppose that A and B share the same random function
+
+  f : {0, 1}^k \to {0, 1}^k
+
+Basically, the idea is that the sender of the message m, computes a sort of
+``digest'' of the message m using f and then it sends to Bob the pair (m,
+f(m)).  Since Bob knows f then he can check the authenticity of the pair
+(m, f(m)) received by computing by itself the digest f(m).  Consider now
+what an attacker can do to break this protocol.  Obviously he can silently
+listen to the conversations between Alice and Bob collecting their
+authenticated messages { (m_i, f(m_i)) }_i and looking at the database of
+these known messages try to guess f. This would be a known-plain-text
+attack.  A more powerful attack would be if the attacker is able to chose
+the messages that will be ``digested''; this would be a chosen-plain-text
+attack.  At the end, if someone reveals to the attacker the secret shared
+between A and B, that is f, then he can forge every message of his choice.
+(What is then the difference between a chosen-plain-text attack and the
+situation when the attacker knows f? Well, generally, when we speak of a
+cpa, we mean a situation where the attacker does not know the key, he can
+encrypt messages of his choice but he can not use these as an attack, that
+is the attacker can only try to find a correlation between the input and
+the output that helps him to find the key.) The security of the method is
+based on the fact every external observer that intercepts and who does not
+know the secret, looking at the signature f(m) sees only random bits. More
+precisely, any attack that tries to guess the key by observing the
+signature will need an exponential quantity of data to have a polynomial
+probability of guessing the key.
+
+Notice however that at this point a problem arise. The function f takes a
+sequence of bits and returns a new sequence of bits of the same length.
+However, the length of the message is not fixed, it can be different from k
+and it can vary between different messages.  We can express our requirement
+formally saying that we need a family of functions:
+
+  f_l : {0, 1}^{kl} \to {0, 1}^k
+
+for every l \in \naturals.  Obviously, it is impossible for Alice and Bob
+to share an explicit representation of an infinite number of functions.
+Since the parameter l represents the number of blocks of k bits that the
+message can be split into, the two actors will share the usual f and they
+agree on some algorithm that iteratively applies f to the sequence of
+blocks that compose m so as to obtain a digest of the whole message m.  Now
+we propose some possible solutions and we show why they fail.  Let M be the
+message and let M = m_1 :: ... :: m_l such that each m_i is a block of k
+bits.
+
+Proposal 1.  Instead of creating a single digest of k bits for the whole
+message create a digest for each of its blocks as:
+
+  f(M) = f(m_1) :: ... :: f(m_l)
+
+the digest of M is the concatenation of the digests of the blocks.
+However, this technique suffers of the problem of malleability, that is,
+any attacker can forge a new message using the f(m_i) as building blocks.
+Notice indeed that with this schema the authentication does not depend on
+the relative order of the blocks.  One undesirable fact of this method is
+also the fact that the signature is long as the message. It is desirable
+instead that the signature is of fixed width.
+
+Proposal 2.  The signature of M is the xor of the signatures of the blocks.
+
+  f(M) = f(m_1) xor ... xor f(m_l)
+
+Notice that in this case the digest is composed by only k bits for the
+whole message and the addition or the removal of some of the blocks change
+the final result. Notice however that the xor operator is commutative, then
+this schema still suffers of the malleability problem: in particular, any
+permutation of the blocks of M produces a message with the same signature.
+
+Proposal 3.  The idea is to encode explicitly the sequence number inside of
+the blocks.  That is, instead of processing m_1 :: ... :: m_l we supply to
+f the sequence (m_1, 1) :: ... :: (m_l, l). Then we use the previous idea:
+
+  f(M) = f((m_1, 1)) xor ... xor f((m_l, l))
+
+However, also this technique is not completely safe. Indeed, it is possible
+to replace one of the blocks of the message with another one.  Assume for
+instance that the attacker Carl has sniffed the following messages:
+
+        Block 1           Block 2
+  M_1   Say hello to      Alice
+  M_2   Send 1$ to        Alice
+  M_3   Say hello to      Carl
+
+for convenience let us refer to them as:
+
+        Block 1           Block 2
+  M_1   A                 B
+  M_2   C                 B
+  M_3   A                 D
+
+Then he can forge the message C :: D = `Send 1$ to Carl' as follows:
+
+  f(M_1) = f(A :: B) = f(A) xor f(B)
+  f(M_2) = f(C :: B) = f(C) xor f(B)
+  f(M_3) = f(A :: D) = f(A) xor f(D)
+  f(C :: D) = f(C) xor f(D)
+            = (f(A) xor f(C) xor f(A)) xor (f(B) xor f(B) xor f(D))
+            = f(A :: B) xor f(C :: B) xor f(A :: D)
+            = f(M_1) xor f(M_2) xor f(M_3)
+
+Proposal 4.  This is the last (and correct) method.  Compute:
+
+  d_1 = f(m_1)
+  d_{n+1} = f(m_{n+1} xor d_n).
+
+It can be shown that this method does not suffer from the malleability
+problem.  It is worth to notice that the technique shown in Proposal 4 is
+quite common every time there is the need of extending an hashing function
+that works on blocks of data to handle messages of arbitrary length.  It
+can be shown that this construction exploits the simpler building block
+without adding additional weakness.  For example, about the authentication
+of messages using random functions: if we are forced by other design
+constraints to use the 3DES one-way function instead of the BBS generator,
+then the above construction is secure at least as the 3DES.  This means
+that the design of the protocol can be modular and flexible as different
+trade-off between the security and the efficiency of the computation
+becomes available.
+
+This form of message signing requires that A and B share a secret, then
+they can sign to each other. Every time A wants to sign a message then he
+must share a secret with the recipient. If there are more recipients A must
+share a different secret for every recipient. Consider for example the case
+where A wants to sign a message for B and C. If they share the same secret,
+when C receives a signed message he can not be sure if the sender is A or
+B. Generally, we need a protocol such that every one can check the validity
+of a signature without the need to share a secret with the sender. More
+formally, a signature protocol can be modelled as a triplet (G, S, V) where
+G, S and V are three PPT algorithms such that:
+  - G is the generator of the keys, it produces uniformly distributed pairs
+    of (public, private) keys
+  - S is the `signer', which takes a message and both the public and
+    private key and outputs a sequence of bits that we call the `digest' of
+    the message.
+  - V is the `verifier', which takes a message and a digest o sign an
+    verifies that that that the pair (msg, sign) has been generated from
+    the owner of the private key using the message msg.
+
+We say that a signature protocol is secure when:
+  - there is an overwhelming probability that the verifiers accepts a good
+    signature:
+
+      \forall m \in \messages .
+      \forall (priv, pub) \in \keysGeneratedByG .
+        \prob[ V(pub, m, S(pub, priv, m)) ] = 1
+
+  - there is a negligible probability that any PPT attacker who does not
+    know the key forges a good signature:
+
+      \forall m \in \messages .
+      \forall (priv, pub) \in \keysGeneratedByG .
+      \forall A \in PPT .
+        \prob[ A(pub, m) = S(pub, priv, m) ] = 0
+
+    (Question: how can we formally express the fact that the attacker does
+    not know the private key?)
+
+To solve this problem public key cryptography comes at our help.  Consider
+for example the case of the RSA protocol. Recall that the private key is
+the pair (p, q) where p and q are big distinct primes whilst the public key
+is (n, e) where n = pq and e is chosen randomly in Z*_\phi(n).  From the
+private and public keys it is possible to compute in DPT the number d, the
+inverse of e in  \in Z*_\phi(n), i.e., ed = i + k\phi(n).  Since \phi(n) is
+the order of the group Z*_n it is possible to prove that D(E(m)) = D(m^e) =
+m^{ed} = m^{1 + k\phi(n)} = m \mod n.  Assume that m \in Z_n, then let S(d,
+m) = m^d, then V(n, e, m, m^d) = ((m^d)^e == m \mod n).  One of the
+problems of this protocol is that the pair (x^e, x) is a valid signature,
+however it is not possible, without knowing the private key, to find an y
+such that y^e = x, so an attacker is only able to forge messages with
+meaningless content.  However, to solve this and also the problem of
+signing messages of arbitrary length now we introduce the concept of hash
+functions.
+
+HASH FUNCTIONS
+
+Let f : {0, 1}^* -> {0, 1}^k be a function, where k is a parameter. This
+means that f is a function that takes a sequence of bits of arbitrary
+length and outputs a sequence of k bits.  It is obvious that such an f is
+not injective. We call collision each pair of (x, y) where x, y \in {0,
+1}^* and x \neq y and f(x) = f(y).  So every such a function has at least
+one collision. However, we informally say that f is collision-free when it
+is very hard to find collisions, possibly it requires exponential time wrt
+k. Notice that this notion of collision-freeness is tightly bound to the
+concept of one-way function. Intuitively, to be collision-free, f must also
+be one-way, otherwise by computing its inverse, it would be possible to
+find collisions (easily, because the domain is finite whilst the codomain
+is infinite, so for every element of the domain there are infinite many
+counter-images). So, by hash function we mean a collision-free f : {0, 1}^*
+-> {0, 1}^k.
+
+It is possible to refine the signature protocol as follows. Let H be an
+hashing function, then define S(pub, priv, m) = (H(m))^d, then to check the
+signature V(pub, m, sig) = (sig^e == H(m)).
+
+BLIND SIGNATURES
+
+The RSA allows to solve the following problem. Consider A and B. B has a
+message m that he wants to be signed by A but B does not want to reveal m
+to A. Let d be the private key of A and (n, e) be its public key. We can
+proceed as follows.
+
+  - B picks out a random b \in Z*_n, then he sends m * b^e to A
+  - A encrypts the message with his private key and returns it to B, E(m *
+    b^e) = (m * b^e)^d = m^d * b^{ed} = m^d * b.
+  - B multiplies the returned message by the inverse of b obtaining m^d =
+    E(m).
+
+Notice that b is chosen uniformly. Since A does not know b, then to here
+all the original messages are equally probable; in other words, A can't
+read m.  What is the meaning of all this? Well, by itself not much.
+However, you have to look at it as a building block for more complex
+protocols: another item of the cryptographer's toolbox!
+
+BIT COMMITMENT
+
+We call `bit commitment' the problem sending information sealed inside
+``security boxes'' in such a way that:
+  - it can be read only with a key that opens the security box
+  - once we send an information locked inside one of these security boxes,
+    it is not possible to change it.
+If it is not difficult to imagine protocols that satisfy the first
+condition using the building blocks that we have seen so far, the latter
+requirement is quite new. To better explain this point let us consider the
+simplest case: we have to seal, or commit, a single bit.  Let C the result
+of the bit commitment. Let D be the algorithm that performs the unlocking
+of sealed bits and it takes a key, the sealed information and outputs the
+value of the original bit. Whit this notation, the second requirement can
+be expressed saying that it must not be possible that:
+
+  \exists C \in \committedbits .
+  \exists k1, k2 \in \keys .
+    D(k1, C) = 1 \and D(k2, C) = 0
+
+All the bit commitment protocols are logically separated in two phases: a
+first phase of ``commitment'' where the main actor computes C and sends it
+to someone else, and the second phase of ``revealing'' when the main actor
+sends the key so as to allow others to read the sealed information.  Now
+follows some example of bit-commitment protocols. Some common notation: let
+A and B two actors, b be the committed bit.
+
+Protocol 1. This is based on a generic symmetric encryption function E
+taking a key and a message. The protocol proceeds as follows:
+
+  - Phase 1: A picks out a random k \in keys and m \in \messages. Then
+    he computes E(k, m::b) and sends it to B.
+  - Phase 2: A sends k to B, who can check the value by computing
+    E(k, E(k, m::b)) = m::b.
+
+Notice that the choice of a random message m to append to b is necessary
+because usual symmetric encryption routines works on blocks of data with a
+minimum length, then m is necessary to avoid brute force attacks.  Notice
+that there is no active interaction of B, thereby this protocol can be used
+when A transmits on broadcast channels where usually the receiver can has
+no way to reply back.  One problem. Currently this protocol is not provably
+secure: no formal justification is known of the fact that breaking this
+protocol implies breaking that the underlying encryption function.
+
+Protocol 2. This second protocol makes use of an hashing function H.
+The protocol proceeds as follows:
+
+  - Phase 1: A picks out r1, r2 \in_R { 0, 1 }^*, then he sends the pair
+    (r1, H(r1 :: b :: r2)) to B.
+  - Phase 2: A sends r2 to B, who can check the value of b as:
+    H(r1 :: 1 :: r2) == H(r1 :: b :: r2).
+
+In this case there are two distinct random sequences of bits, r1 and r2,
+but only r1 is sent to B in the first phase. This is a way to make
+difficult for A to break the second requirement, that is, to find two
+sequences r2 and r2' such that H(r1 :: b :: r2) = 1 \and H(r1 :: b :: r2')
+= 0.  On this point we rely on the assumption that it is hard to find
+collisions.  On the other hand, until A reveals r2 to B, B is unable to try
+a brute force attack, and on this point we rely on the fact that H is
+one-way. However, also in this case, no rigorous justification of the
+security of this method are known: it is not provable secure.
+
+Protocol 3. The protocol proceeds as follows:
+
+  - B picks out r \in_R { 0, 1 }^k and sends r to A.
+  - A draws s \in { 0, 1 }^k and sends (b && r) \xor BBS(s)
+  - A reveals s to B
+
+(I do not understand what is the role of r here.) This protocol is provably
+secure: it can be formally proved that if we can break this schema we can
+also break the BBS PRNG, therefor (as seen above) we would be able to solve
+the factorization problem. This protocol has a practical disadvantage: it
+is computationally expensive and this cost is due to the use of BBS. As
+seen above, it would be possible to obtain different trade-off between
+efficiency and security by replacing the BBS with some computationally
+cheaper PRNG.  However, it is worth stressing that the main advantage of
+this protocol over the previous two is in the provable security: no matter
+what PRNG you chose, it can be proved that this schema is strong at least
+as the underlying PRNG.
+
+(Guarda sulle note del corso per SCHEMI A BARRIERA, UNTRACEABLE
+COMMUNICATIONS)
+
+DYNING CRYPTOGRAPHERS
+
+Consider the following schema:
+
+        B
+
+     x     y
+
+  A     z     C
+
+where { A, B, C } are the cryptographers and { x, y, z } are the i.i.d.
+coins. Assign to every { A, B, C } a value in { 0, 1 } as:
+
+  A = x ^ z
+  B = x ^ y
+  C = y ^ z
+
+If X \in { A, B, C } has paid the dinner, flip its value, e.g., if B paid
+its value would become B = x ^ y ^ 1.  If none in { A, B, C } has paid the
+dinner then: A ^ B ^ C = 0.  Otherwise, assuming that the dinner has been
+paid once, A ^ B ^ C = 1.  Thus A ^ B ^ C = 1 iff the dinner was paid by
+one of them.  Now, suppose one of them paid.  To show that they are unable
+to identify who paid consider the point of view of A (by symmetry, other
+cases are equal.) If A itself paid, he knows. Consider the other case: A
+did not pay, then, since we are assuming that one of them paid, B or C
+paid. We are in the case: x ^ z ^ B ^ C = 1.  Consider that A sees only the
+values of x, z, B, C.  When I say that A is able to distinguish who paid
+among B and C I mean that he is able to compute x ^ y or y ^ z.  It can be
+easily proved that if A is able to distinguish between these two
+possibility (B paid or C paid) then he is also able to compute the value of
+y.  Then I used the following C program to automatically verify the 32
+possible cases that show that by knowing only x, z, B, C it is not possible
+to compute y. Thus A can't distinguish between B and C.
+
+  #include <stdio.h>
+
+  int res[32];
+
+  #define select(i,j) (((i) & 1<<(j)) != 0)
+  #define x(i) select(i,0)
+  #define y(i) select(i,1)
+  #define z(i) select(i,2)
+  #define b(i) select(i,3)
+  #define c(i) select(i,4)
+  #define a(i) (x(i) ^ z(i))
+
+  int
+  main() {
+    int i;
+    for (i=0; i < 32; ++i)
+      if (a(i) ^ b(i) ^ c(i))
+        res[i] = 1;
+
+    for (i=0; i < 32; ++i)
+      if (res[i] == 1)
+        if (res[i ^ (1<<1)] == 0)
+          printf("Error: %d\nx=%d z=%d b=%d c=%d",
+                 i, x(i), z(i), b(i), c(i));
+
+    return 0;
+  }
+
+Informally, see that A knows that B ^ C = x ^ y ^ y ^ z ^ 1 = x ^ z ^ 1,
+thus the value of the condition ``B paid or C paid'' does not depend on y,
+which can thus have any value.
+
+ZERO-KNOWLEDGE
+
+In this section we consider the following situation.  Peggy knows a secret
+(you can think a password) and she wants to convince Victor that she knows
+it but in such a way that:
+  - she does not reveal to Victor the secret.
+  - After she has proved to Victor that she knows the secret, he will not
+    be able to convince any other that she knows the secret.
+
+To explain better the situation consider the following metaphor.
+Think to an underground corridor as the one depicted below:
+
+          ------(c)
+          |      |
+  (a)----(b)    (X)
+          |      |
+          ------(d)
+
+Where the point represented by the `X' is a gate that is closed and can be
+opened only by knowing the secret, say by typing it on a keyboard.  The two
+actors can use this device to achieve their objective.  Consider the
+following three possibilities.
+
+1. P and V enter from (a) reach the point (c), then P opens the gate (X) by
+using her secret. V sees this and then he is convinced of the fact that P
+knows the secret. However, one problem of this procedure is that since V is
+near to P when she types the secret he can see and steal the secret to P.
+So, this does not respect the first of the two requirements initially
+stated.
+
+2. P and V enter from (a), they reach the cross (b). Then V waits there
+until P continues reaching (c), then she uses her secret to open the gate
+(X) and returns to (b) from the opposite side (d).  When V sees P returning
+from the opposite side (d) he is convinced that P knows the secret because
+the only way to pass from (c) to (d) is to open the gate.  Notice however
+that this procedure has a subtle defect, indeed V can film P disappearing
+in one direction and reappearing from the opposite side and, with this
+video, he can convince other people that P knows the secret. Then this
+schema does not satisfy the second requirement that we have initially
+stated.
+
+3. To overcome also the last problem consider this procedure. V and P are
+both at (a). Now P proceeds alone reaching the point (b). Then she decides,
+for example using a coin flip, the direction to go toward, (c) or (d), and
+then she reaches that point. When P is in place, at (c) or (d), V enters
+the corridor by reaching (b). Notice that V, being at (a) has not seen the
+direction taken by P, then V cannot film P going in one direction. Then V
+flips a coin to chose between (c) and (d) and then he calls P by cell phone
+to tell her the result of his coin flip. P exits from the side asked by V.
+Notice that if P does not return form the direction asked by V, then V can
+conclude that definitely P was unable to pass the gate (X) then that she
+does not know the secret.  But otherwise, if P returns from the direction
+asked by V, then V can not conclude that P knows the secret, because it is
+possible, with probability 1/2 that she was already on the requested side.
+At this point the idea is to repeat k times this experiment with the
+following result: if P can not return from the requested direction in at
+least one of the k experiments then V knows by sure that P does not know
+the secret. Otherwise, V can conclude, with overwhelming probability
+1-2^{-k}, that P knows the secret. Indeed, it is only with probability
+2^{-k} that P is always requested to return from the side where she already
+is.  Notice also that with this schema V is unable to convince any other of
+the fact that P knows the secret because he does not see the side chosen by
+P then he is unable to prove that P entered from one side and returned from
+the other.  Of course this is a metaphor, and some details are not precise,
+for example we assume that V does not film his coin flip, otherwise any
+viewer of the sequence could be convinced with overwhelming probability
+that P knows the secret.
+
+INTERACTIVE PROOF SYSTEM
+
+The protocols described in this section are based on the difference between
+the ``search of a proof'' and the ``verification that a given proof is
+correct''.  In terms of computational complexity, the existence of
+crypto-system relies on the existence of problems that are hard to solve
+but given the solution, it is easy to verify that the given one is actually
+a solution.  Consider for example the problem of satisfiability of boolean
+formulas: the finding of a satisfying assignment for a given boolean
+formula is a NP-hard problem, but given the formula and an assignment it
+can be checked in polynomial time if with that assignment the formula is
+true.  Now we consider the theory of Interactive Proof Systems (IPS), whose
+elements are:
+
+  - a PROVER, that we suppose has unbounded computational power
+    (think to it as an oracle).
+  - a VERIFIER, modeled as a PPT algorithm.
+
+In the next we will see some example where the prover can also be modeled
+as PPT algorithm that however has enough information to invert a one-way
+function with trap-door.
+
+Definition.  A language L has an IPS if exists a verifier V such that:
+
+  \exists P \in \PROVERS :
+  \forall x \in L .
+    \prob((P,V) accepts x) > 2/3
+
+  \forall P \in \PROVERS :
+  \forall x \not \in L :
+    \prob((P,V) accepts x) < 1/3.
+
+Informally, this definition means that L has an IPS if there exists a pair
+(P,V) such that for every x \in L, P is able to convince V that x \in L and
+exists no other prover that for every x \not \in L can foolish V by making
+him believe the opposite.  The same definition can be reformulated with
+other bounds, the essential requirement is that they are strictly greater
+and strictly smaller than 1/2.  It can be proved that all these definitions
+are equivalent. It can also be seen that the definition can be written
+using probabilities =1 and <= 1/2.
+
+Example 1.  Let n = pq, where p,q \in \primes, p \neq q.  Consider the
+language:
+
+  L = { x \in Z*n | x has Jacobi symbol 1 and it is a non square }.
+
+As we have already shown, without knowing the factorization of n, the
+problem of recognizing L requires exponential time to be solved.  Consider
+the following IPS for this language: V choses a random element x \in Z*n
+and asks to P if x \in L.  It is possible for V to compute in PT the Jacobi
+symbol of x even without knowing the factorization of n, then we assume (x
+/ n) = 1.  Of course, P can simply compute the factorization of n, return
+it to V. V provided with this information can compute the answer by itself
+in DPT.  In other words, if (x \in L) then with probability 1, P is able to
+convince V.  Otherwise, if (x \not \in L), every other prover P' that wants
+to foolish V can only return a wrong factorization of n, but in this case V
+will notice and reject x.  However, this schema is not of great interest as
+from the interaction, V can learn the secret of P.  Consider this other
+protocol:
+
+  - V picks out
+    $ b_i \in {0, 1}, $ z_i \in Z*n,
+    let: w_i = z_i^2 * x^{b_i};
+    for i = 1, ..., l
+    V sends the { w_i }_i to P
+  - P checks whether w_i \in L by checking if it is a square or not and
+    defines c_i = 0 if w_i is a square, or c_i = 1 if w_i is a non square.
+    Then she returns the sequence { c_i }_i to Victor.
+  - V accepts (x \in L) if { b_i } = { c_i }.
+
+Now consider the two possible cases.
+
+  - (x \in L), i.e., x is a non square. Then the P just described will
+    produce a sequence of bits { c_i } such that { c_i } = { b_i } and V
+    will accept with probability 1.
+  - (x \not \in L), i.e., x is a square. Then any other prover P' that
+    wants to foolish V making him believe that (x \in L) has to guess the
+    sequence { b_i }.  Since x is a square the w_i are all squares, then
+    from the sequence { w_i }, P' has no information about the { b_i }.
+    The only thing she can do is to guess, and then the probability of
+    fooling V is 1/2^l.
+
+It is quite clear that in this protocol Peggy does not reveal the
+factorization of n to Victor. A second interesting property is that from
+the interaction, Victor is unable to convince any other actor that x \in L
+or not.  Basically, this is because Victor can simulate by itself an
+interaction with P by generating itself the sequence c_i.  From the point
+of view of the applications, these are the interesting properties. In the
+literature, a proof performed using an IPS that has this last property
+(only V can be convinced by the interaction) is called `zero-knowledge'
+proof.  More precisely, we say:
+
+Definition. An IPS (P, V) is zero-knowledge if there exists a PPT machine
+that is able to simulate the interactions between P and V.  Depending on
+how good this machine is able to simulate the interactions, there are three
+different notions of zero-knowledge.
+
+  - Perfect. Perfect is perfect. What else?
+  - Statistical. The difference between the probability distribution of the
+    machine and the IPS is smaller than any polynomial in the length of the
+    interaction.
+  - Computational. If it does not exist any PPT distinguisher that is able
+    to discern the simulated interactions from the reals.
+
+You can think to the situation described in the previous example also from
+another point of view. Consider P not as an oracle, but as a PPT algorithm,
+which may or may not know the factorization of n.  Now the problem is that
+P wants to convince V that she knows the secret in a zero-knowledge way.
+>From the point of view of Victor these are the possible situations.  To
+simplify we assume that l = 1.
+
+  - if b = 0 and c = 1 then with probability 1, P does not know the secret
+    (remember that here we are assuming that P want to convince V that she
+    has the secret, so if she actually have it, then she will certainly
+    follow the protocol.)
+  - if b = 1 and c = 0 or b = c then V can not conclude anything, i.e., it
+    is possible that P has simply guessed the correct answer.
+
+By repeating this experiment many times, we can make the probability that P
+foolish V arbitrarily small. (But I do not know how to show this.)
+
+Informally we can say that the interaction is zero-knowledge if Victor can
+generate the same sequence (simulate the interaction) without interacting
+effectively with Peggy. In this case, any third actor C is unable to
+distinguish a sequence generated by an effective IPS interaction and a
+sequence produced by V itself with a simulation.
+
+Example 2. Let:
+
+  L = { (G1, G2) | G1 and G2 are isomorphic graphs }.
+
+Suppose that (G1, G2) are chosen randomly.  V queries P to know if they are
+isomorphic, that is, if (G1, G2) \in L.  Again, P can simply compute the
+permutation and return it to V. V would then be able to verify the answer
+by itself.  At this point V accepts if and only if the permutation returned
+by P is the correct one. No prover P' than can foolish V exists.  However,
+we are interested in interactions that does not reveal the secret: in
+particular now we want that P proves to V whether (G1, G2) \in L without
+revealing the permutation. We show that also with this constraint there
+exists a prover P that is able to convince V whenever (G1, G2) \in L.  The
+protocol proceed as follows:
+
+  - P choses a random permutation of G1, say G and sends G to V.
+  - Victor choses randomly i \in { 1, 2 } and asks to Peggy to prove him
+    that Gi and G are isomorphic.
+  - since P knows the permutation between G1 and G2 and also between G1 and
+    G then she can compute the permutation between G and G2.
+    She returns to V pi = pi(G1, G) if i = 1 or pi = pi(G2, G) if i = 2.
+  - With the permutation pi, Victor can verify in polynomial time that Gi
+    is isomorphic to G in this case he accepts the pair (G1, G2).
+
+These are the possible cases.
+
+  - If (G1, G2) \in L, then P always returns the requested permutation,
+    then she will be able to convince V with probability 1.
+  - If (G1, G2) \not \in L, then any other prover P' that wants to foolish
+    V can only guess with probability 1/2 the i \in {1, 2} chosen by V,
+    then P' will produce a G isomorphic to G1 or G2 but not to both. Then V
+    will accept only with probability 1/2.
+
+Consider now the other point of view.  Assume that (G1, G2) \in L and that
+P, which is a PPT, may know the permutation between the two.  Now, P wants
+to convince V that she knows the permutation.  The protocol is the same.
+The two possible cases are:
+
+  - If the permutation produced by P is not correct then V can conclude
+    that with probability 1, P does not know the permutation between G1 and
+    G2, otherwise she would have answered correctly.
+  - If the permutation produced by P is correct then V can conclude that P
+    knows the secret or she has simply guessed right. However, the
+    probability of guessing the correct permutation by a PPT is very
+    smaller, definitely (polynomially) smaller than 1/2.  Then, using the
+    Cernov Bound, by repeating multiple times the same experiment, V can be
+    convinced with overwhelming probability of the fact that P knows the
+    secret.
+
+Moreover, Victor by itself can simulate the interactions with Peggy and so,
+external observer will not be able to distinguish a sequence resulting from
+a true interaction from a sequence resulting from a V's simulation.
+Indeed, Victor can simply chose randomly i \in { 1, 2 }, compute a
+permutation G of Gi and then ask itself to find the permutation between G
+and Gi. The trick is in the fact that there is no causal or temporal
+dependence between the messages exchanged, thus V can simulate an
+interaction by inverting the steps of the protocol: first he choses the i,
+then he choses the permutation.  Now we remark one important characteristic
+of the zero-knowledge: for every message that V receives from P, V must be
+able to reproduce it without interacting with P. In other words, V should
+learn nothing by looking at the messages only.  The only difference between
+someone that reads the sequence of messages written as a sequence of
+symbol and V interacting with P is in the fact that the temporal information
+(eg. the message A comes before the message B, which is followed by ...) is
+lost when we write down the sequence.
+
+Example 3. (Hamiltonian Cycle) Let G be a graph, assume that G has an
+Hamiltonian cycle that P knows.  P wants to prove to V that she knows the
+cycle but in a zero-knowledge way.  The protocol is the following:
+
+  - P choses a random permutation G' of G and produces G'' as a bit
+    commitment of G' (a graph can be represented as a matrix of bits).  P
+    sends G'' to V.
+  - V choses randomly i \in {1, 2} and sends i to P.
+    The i should interpreted as follows:
+      i = 1, V asks to P to reveal the permutation between G and G'
+      i = 2, V asks to P to reveal the Hamiltonian cycle on G'.
+  - If i = 1 then P sends the permutation between G and G'
+    if i = 2 then P sends the key for the arcs of G' that are part of the
+    h. cycle on G' that P can compute from the h.cycle on G and the
+    permutation from G to G'.
+
+Notice that this is an IPS.  Indeed:
+
+  - if P knows the Hamiltonian cycle of G then with probability 1, V will
+    accept G.
+  - if P does not know the secret, then she will be able to guess the i
+    chosen by V and to produce the correct answer, only with probability
+    less than 1/2.
+
+Notice that in this case V sends only a single bit to P. This is based on
+the famous principle for the fair repartition of resources between two
+actors: A cuts the cake and B choses its own half. It seems that the point
+for a ``true'' zero knowledge is here.  Quite obviously, V cannot learn
+anything about the Hamiltonian cycle of G from the interaction with P.
+However, since V cannot ask ``is x a square?'' as in the previous example,
+V cannot earn anything else other that the fact that P knows the secret or
+not.  To see that V can simulate an interaction with P, consider the
+sequence:
+
+  - V choses $ i \in {1, 2}.
+  - if i = 1, then he computes a random permutation G' computes the bit
+    commitment G'' of G' and outputs the sequence of messages
+      (1, G'', the permutation between G and G' and the clearance of all
+      bits of G'')
+    if i = 2, then he computes G'' as the bit commitment of the full matrix
+    (with 1 in all the positions) then outputs the triple:
+      (2, G'', clearance for n random elements of the matrix G'')
+
+Using the ``computational'' definition of zero-knowledge we can see that no
+PPT observer can notice that in the second case G'' is the bit commitment
+of a graph that is not a permutation of G.
+
+Note.  The general schema of the interaction between P and V in a
+zero-knowledge schema can be described as:
+
+  - P sends a challenge to V,
+  - V sends a bit back to P,
+  - P sends a response back to V.
+
+NON-INTERACTIVE ZERO-KNOWLEDGE
+
+In the above examples we have seen that usually more rounds are necessary
+to obtain an overwhelming probability of success.  One question that may
+arise is whether it is possible to define the interaction is such a way
+that instead of a sequence of repeated rounds, all challenges are sent at
+once, all bits b are sent back at once and in the same way all responses
+arrive simultaneously. The answer is quite interesting: consider the
+possibility of using an hash function H to define the ``time arrow'' or
+``causality arrow''.  Think to an interactive zero-knowledge protocol where
+V computes the sequence of bits as the hash of the sequence of challenges:
+<b_1, ..., b_n> = H(<c_1, ..., c_n> ).  With this protocol V will be no
+more able to simulate an interaction with P as for the Hamiltonian Cycle.
+Indeed, in that example V was able to simulate an interaction by inverting
+the sequence of messages: by knowing the value of b in advance, V can
+produce a pair challenge/response that satisfies the protocol.  To do the
+same using H, V would be requested to invert H, which is one-way, in order
+to compute the challenge from b.  The protocols that develops from this
+idea are called ``non-interactive zero-knowledge'' and they do not require
+the presence of a verifier V.  A PPT prover P that knows some secret can
+simply prove to every one that she knows it by producing the sequence < {
+c_i }, { r_i} >, where the b's are defined as b = H(c).  It is a quite
+interesting fact that, working in PPT, the existence of one-way hash
+functions, allows us to define an ``arrow of time'' or ``causality arrow'',
+that is to define a sequence of events that are not commutative.
+
+AUTHENTICATING AGENTS
+
+Now we want to analyze the problem of the authentication of agents in a
+communication. Consider the agents Alice and Bob in a situation where they
+want to exchange some information over a network. Now we want to describe
+some protocols that allow them, before starting the actual conversation, to
+be sure that the other peer is actually who he claims to be.  In more
+technical words, we want to find protocols to avoid man-in-the-middle
+attacks.  At this point it is worth to explicitly introduce the distinction
+between `cryptographic primitive' and `cryptographic protocol'.  With
+`cryptographic primitive' we mean a technique that allows some kind of data
+processing and ensures some properties. Instead, with `cryptographic
+protocol' we mean a communication protocol built-up from cryptographic
+primitives that in this context are regarded as black-boxes.
+
+Protocol 1. (improperly called ``Needham-Schroeder''.) A and B want to
+authenticate. This protocol is based on public key encryption; thus it is
+assumed that both the agents have their own pair (public key, private key)
+pair and that the private key is known only to its owner and the public key
+is known by everyone.  Under these assumption we denote:
+
+  - [M]_{K} the message M encrypted using the key K
+  - PB the private key of the agent B
+  - X.Y the concatenation of the messages X and Y
+
+Now consider the following exchange of messages:
+
+  1. A --> B:   A.B.[N_A, A, K_{AB}]_{PB}
+
+where:
+  - A.B: like in TCP protocol, a packet contains the addresses of the
+    recipient and of the sender of the message.
+  - K_{AB}: is the symmetric key that A propose to B to be used for the
+    next communication (eg. AES).
+  - N_A: is a random sequence of bits (seed) chosen by A and sent to B so
+    as to challenge him, that is, to see if the other peer is able to
+    decrypt the message encrypted with the key PB.
+
+  2. B ---> B.A.[N_A, N_B]_{PA} ---> A
+
+B responds by showing to A that he was able to complete the challenge, that
+is, to decrypt N_A, then B makes his challenge, N_B, to A.
+
+  3. A ---> A.B.[N_B]_{PB} ---> B
+
+A solves B's challenge and notifies B of this.  Notice that the symmetric
+key K_{AB} travels on the network only once and it is encrypted using the
+public key of B. This means that only B will be able to communicate with
+the initiator of the communication. But from the point of view of B, the
+challenge N_B guarantees to him that the other peer is A as only the owner
+of PA can decrypt [N_B]_{PA}.  In this sense K_{AB} is by itself a
+challenge to B, however the initial challenge [N_A]_{PB} is necessary so as
+at the handshake both peers are mutually authenticated.  However, it is
+possible to attack this protocol as follows.  Now we introduce a third
+actor I (the intruder or man-in-the-middle).  The final result of this
+attack is that if A tries to establish a connection with I, then I can
+establish a connection with B with the identity of A.
+
+  A --> I: A.I.[N_A, A, K]_{PI}
+  I --> B: A.B.[N_A, A, K]_{PB}
+  B --> A: B.A.[N_A, N_B]_{PA}
+
+then I intercepts this last message and forges:
+
+  I --> A: I.A.[N_A, N_B]_{PA}
+  A --> I: A.I.[N_B]_{PI}
+  I --> B: A.B.[N_B]_{PB}
+
+This way I uses A to solve the challenge of B.  To avoid this attack it is
+sufficient modify the protocol so as to mark the challenge with the
+identity of the issuer, in particular, if B instead of sending B.A.[N]_{PA}
+sends the message B.A.[N, B]_{PA}, then I will be unable to use A to solve
+this challenge for him.  But the point of this example is that the
+definition of ``secure'' protocol is not obvious. There may be several and
+different notions of secure protocol and many of them may seem reasonable
+until an attack is found.  The idea is to strive to have a simple
+definition so as more people can understand it and convince themselves of
+its correctness or try to find attacks that do not match that definition.
+For example, in the first version of the protocol, no Intruder is able to
+initiate a communication by its own with B making him believing to be
+another agent.  However, the attack that we have presented here waits until
+A initiates a connection with I and only then I starts the attack against
+B.  It is worth to stress that this attack exploits a defect of the
+protocol, not of the underlying cryptographic primitives.
+
+One of the most interesting approach to the validation of protocols is due
+to Dolev and Yao and it is based on formal methods. Basically, if we assume
+the security of the underlying cryptographic primitives as axioms then it
+is possible to forget about all the aspects of the probability theory
+related to this objects and treat instead the whole system algebraically,
+as composed by axioms and formal deduction rules and where properties can
+derived using these elements.  Of course, this approach introduces some
+approximation in the model, for example, the negligible probability of
+factoring in polynomial time is simplified stating the this computation is
+not possible.  With this framework, it must be checked explicitly that the
+algebraic model is safe wrt the semantics of the original model, but once
+this is certified, then it can be concluded that any property that is true
+in the simplified algebraic model is true also in the original (complex)
+model.
+
+Protocol 2. (another Needham-Schroeder.) This second version of the
+authentication protocol requires the existence of a third party agent S
+that is trusted by both A and B.  With this we mean that every agent A
+shares a symmetric key (here denoted as A) with S.  This formulation of the
+protocol is based exclusively on symmetric encryption.
+
+  A --> S:  E_A[A.B.N]
+
+Here A tells to S that she wants to initiate a communication with B.
+N is a challenge for S.
+
+  S --> A:  E_A[N.B.K_{AB}.E_B[K_{AB},A]]
+
+The S responds by solving the challenge, providing the symmetric key K_{AB}
+to be used for the communication between A and B. Then S provides also a
+ticket.
+
+  A --> B: E_B[K_{AB}, A]
+  B --> A: E_{AB}[M]
+  A --> B: E_{AB}[M + 1]
+
+Notice that no clear-text keys travel the network.  This authentication
+schema is at the base of the Kerberos authentication protocol.  To prevent
+attacks to the symmetric encryption, a time-stamp is usually added to the
+ticket produced by the server so as to shorten its validity.  Indeed, the
+use of symmetric encryption makes the system more vulnerable to brute force
+attacks wrt public/private encryption schema.

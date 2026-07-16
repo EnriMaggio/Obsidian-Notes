@@ -1,3 +1,8 @@
-[[01.SVILUPPO AGILE|sviluppo agile]]
-
-
+- [[01.Processi Software|Processi Software]]
+-  [[02.Sviluppo agile|Sviluppo agile]]
+- [[03.Requisiti|Requisiti]]
+- [[04.Architetture software|architetture software]]
+- [[05.Testing | Testing]]
+- [[06.Testing data | Testing data]]
+- [[07.refactoring | Refactoring]]
+- [[08.Project management| Project management]]

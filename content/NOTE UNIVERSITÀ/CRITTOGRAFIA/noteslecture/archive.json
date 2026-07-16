@@ -1,0 +1,138 @@
+{
+  "appVersion" : "1.4.33",
+  "appBuild" : "197",
+  "packageFormatVersion" : "1.2",
+  "version" : 1,
+  "type" : "dataExport",
+  "createdAt" : "2026-02-10T10:47:52Z",
+  "items" : [
+    {
+      "subtype" : 0,
+      "id" : "DDF1E3BFE4F44A33ABB60B3C71C2183A",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "12 novembre",
+      "isDrawing" : true,
+      "relativePath" : "\/12 novembre.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "AC1CC6B5F8834E17ADA8823851DCE1DB",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "Codifica di un singolo bit",
+      "isDrawing" : true,
+      "relativePath" : "\/Codifica di un singolo bit.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "345142D4E59146AC9E9A441118AD5C00",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "Teoria dei numeri 1",
+      "isDrawing" : true,
+      "relativePath" : "\/Teoria dei numeri 1.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "C9AF149E494A4DE4B4D267CB207B48CA",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "5 novembre",
+      "isDrawing" : true,
+      "relativePath" : "\/5 novembre.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "6E748AF2DAF141F1B06F09979BE570AE",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "Teoria dei numeri 2",
+      "isDrawing" : true,
+      "relativePath" : "\/Teoria dei numeri 2.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "488E3714C0D44C1F84B84E70E3D5CADD",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "18 novembre",
+      "isDrawing" : true,
+      "relativePath" : "\/18 novembre.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "0329F6D725754BDB8E6B0AC7BEA3BBDD",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "Diffie Hellman",
+      "isDrawing" : true,
+      "relativePath" : "\/Diffie Hellman.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "F60D5F4E03404112955A1F1CF93E2657",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "19 novembre",
+      "isDrawing" : true,
+      "relativePath" : "\/19 novembre.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "200CC1E2DB324F529D5266B728270378",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "Codifica di bit multipli",
+      "isDrawing" : true,
+      "relativePath" : "\/Codifica di bit multipli.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "3D421E22108E4849B722383F67569E18",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "26 novembre",
+      "isDrawing" : true,
+      "relativePath" : "\/26 novembre.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "C9E2BAC872FB422CAF73F131CEEA7422",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "Lancio di moneta",
+      "isDrawing" : true,
+      "relativePath" : "\/Lancio di moneta.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "60256E00945C40D8AD9F7ED72599FC06",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "25 novembre",
+      "isDrawing" : true,
+      "relativePath" : "\/25 novembre.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "0B51F439D23F43AA8FC687DCC2B01629",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "7 ottobre",
+      "isDrawing" : true,
+      "relativePath" : "\/7 ottobre.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "CDFC51A106E04DCE893B03261987E551",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "RSA",
+      "isDrawing" : true,
+      "relativePath" : "\/RSA.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "0EEEF59E7E4245DBB69B069B3312F317",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "8 ottobre",
+      "isDrawing" : true,
+      "relativePath" : "\/8 ottobre.pdf"
+    },
+    {
+      "subtype" : 0,
+      "id" : "91E075DA36834130A42DAD485681F29F",
+      "parentId" : "F84A37D2B8F74F07AD6A18EBA13D7CB0",
+      "name" : "Bit pseudocasuali",
+      "isDrawing" : true,
+      "relativePath" : "\/Bit pseudocasuali.pdf"
+    }
+  ]
+}

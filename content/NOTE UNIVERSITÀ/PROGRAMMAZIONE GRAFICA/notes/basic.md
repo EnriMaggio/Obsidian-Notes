@@ -1,0 +1,1 @@
+è una libreria grafica che mi permette di scrivere codice che comunica con l'hardware della gpu

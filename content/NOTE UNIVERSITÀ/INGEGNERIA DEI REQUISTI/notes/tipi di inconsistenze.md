@@ -1,0 +1,10 @@
+- Clash di Terminologia 
+	Questo tipo di inconsistenza si verifica quando lo stesso concetto viene nominato in modi diversi nelle diverse dichiarazioni. Ad esempio, nella gestione di una biblioteca, i termini borrower e patron possono essere utilizzati per indicare la stessa figura. 
+- Clash di Designazione
+	Si verifica un clash di designazione quando lo stesso nome viene utilizzato per concetti differenti. Ad esempio, il termine user potrebbe riferirsi sia a un library user che a un library software user, creando confusione.
+- Clash Strutturale 
+	Questo tipo di inconsistenza si verifica quando lo stesso concetto è strutturato in modo diverso in dichiarazioni differenti. Un esempio è la latest return date, che può essere interpretata sia come un punto temporale specifico (es. Venerdì alle 17:00 ) che come un intervallo di tempo (es. il Venerdì).
+- Conflitto Forte
+	Un conflitto forte si verifica quando le dichiarazioni sono logicamente inconsistenti e non possono essere soddisfatte contemporaneamente, ad esempio, “le restrizioni dei partecipanti non possono essere divulgate a nessuno” contro “l’iniziatore dell’incontro dovrebbe conoscere le restrizioni dei partecipanti”.
+- Conflitto Debole (Divergenza)
+	I conflitti deboli avvengono quando le dichiarazioni non possono essere soddisfatte insieme sotto certe condizioni limite. Questi sono molto più frequenti nell’ingegneria dei requisiti e anche molto più difficili da identificarli. Ad esempio, da un punto di vista del personale, “i lettori devono restituire i libri presi in prestito entro due settimane” può confliggere con la prospettiva del lettore che “i lettori possono tenere i libri presi in prestito finchè necessario”, se il lettore ha bisogno del libro per più di due settimane. Questi tipi di inconsistenze richiedono attenzione e strategie specifiche per la loro risoluzione, per garantire che il processo di sviluppo dei requisiti sia efficace e che il prodotto finale soddisfi tutte le parti interessate.
