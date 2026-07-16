@@ -1,5 +1,0 @@
-- [[00.INTRODUZIONE | Introduzione]]
-- [[SISD (Single Instruction, Single Data) | SISD (Single Instruction, Single Data)]]
-- [[SIMD (Single Instruction, Multiple Data) | SIMD (Single Instruction, Multiple Data)]]
-- [[MISD (Multiple Instruction, Single Data) | MISD (Multiple Instruction, Single Data)]]
-- [[MIMD (Multiple Instruction, Multiple Data) | MIMD (Multiple Instruction, Multiple Data)]]
