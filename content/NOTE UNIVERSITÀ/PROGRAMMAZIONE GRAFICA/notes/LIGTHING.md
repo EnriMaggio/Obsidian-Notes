@@ -1,5 +1,0 @@
-- [[luce e colori nella realtà]]
-- [[luce in computer grafica]]
-- [[shading]]
-- [[trasformazioni shading]]
-- [[luci]]
