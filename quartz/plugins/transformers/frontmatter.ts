@@ -63,13 +63,16 @@ export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts)
         () => {
           return (_, file) => {
             const fileData = Buffer.from(file.value as Uint8Array)
-            const { data } = matter(fileData, {
+            const matterResult = matter(fileData, {
               ...opts,
               engines: {
                 yaml: (s) => yaml.load(s, { schema: yaml.JSON_SCHEMA }) as object,
                 toml: (s) => toml.parse(s) as object,
               },
             })
+            const data = (typeof matterResult.data === "object" && matterResult.data !== null)
+              ? matterResult.data
+              : {}
 
             if (data.title != null && data.title.toString() !== "") {
               data.title = data.title.toString()

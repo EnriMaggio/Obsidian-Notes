@@ -1,5 +1,3 @@
-
----
 ### Card sorts
 
 l'obiettivo di questo metodo è di raffinare le informazioni già elicitati. Attraverso già l'acquisizione delle informazioni sono stati definiti dei concetti e che verranno messe in delle carte, in seguito si chiede agli stakeholder di suddivere l'intero mazzo dei concetti in sotto mazzi basati sui loro criteri, ovvero se certe carte sono attinenti tra di loro e chiedere allo stakeholder il motivo della suddivisione.
